@@ -1,0 +1,17 @@
+Used http://nifty.stanford.edu/2012/guerin-image-editor/image_editor.html 
+as a refernce to get sample input pictures.
+
+Programs to convert file types:
+1. convert 
+2. avconv
+
+Dipsplay useful image information
+1. identify img.ppm
+
+Display images:
+1. display img.ppm
+2. xo img.ppm
+3. gimp img.ppm
+
+Before handing in:
+1. Make sure to remove the line that runs the program in the Makefile
