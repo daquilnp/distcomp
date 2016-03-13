@@ -1,0 +1,7 @@
+#!/bin/bash
+
+GEN=1000
+POP=100
+IMG=image2
+
+./racc $GEN $POP $IMG

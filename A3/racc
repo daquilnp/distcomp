@@ -1,0 +1,12 @@
+#!/bin/bash
+
+GEN=$1
+POP=$2
+IMG=$3
+
+make acc
+
+name="${IMG}_${GEN}_${POP}.ppm"
+echo $name
+
+./genimg_acc ${IMG}.ppm $name $GEN $POP

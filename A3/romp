@@ -1,0 +1,14 @@
+#!/bin/bash
+
+NUM=$1
+GEN=$2
+POP=$3
+IMG=$4
+
+make clean
+make omp
+
+name="${IMG}_${GEN}_${POP}.ppm"
+echo "./genimg_omp $NUM ${IMG}.ppm $name $GEN $POP"
+
+./genimg_omp $NUM ${IMG}.ppm $name $GEN $POP

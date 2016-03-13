@@ -1,0 +1,10 @@
+#!/bin/bash
+
+GEN=1000
+POP=100
+IMG=image2
+
+./romp 1 $GEN $POP $IMG
+#./romp 2 $GEN $POP $IMG
+#./romp 4 $GEN $POP $IMG
+#./romp 8 $GEN $POP $IMG

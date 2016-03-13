@@ -1,0 +1,46 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BUF_SIZE	compimage.c	31;"	d	file:
+CC	makefile	/^CC=gcc$/;"	m
+CC_ACC	makefile	/^CC_ACC=gcc #pgcc$/;"	m
+CC_OMP	makefile	/^CC_OMP=gcc #pgcc$/;"	m
+CFLAGS	makefile	/^CFLAGS=-g -pg -fopenmp -O2 -Wall -DVERSION_OMP -DMONITOR -DBONUS_VIDEO -DBONUS_EFF # Note: you must have -DMONITOR to have -DBONUS_VIDEO$/;"	m
+CFLAGS_ACC	makefile	/^CFLAGS_ACC=-g -pg$/;"	m
+Cell	a3.h	/^} Cell;$/;"	t	typeref:struct:__anon3
+DO_NOT_CHANGE	a3.h	45;"	d
+INCLUDED_A3_H	a3.h	20;"	d
+Individual	a3.h	/^} Individual;$/;"	t	typeref:struct:__anon2
+MON_GEN	a3.h	46;"	d
+NUM_ARGS	main.c	23;"	d	file:
+NUM_ARGS	main.c	25;"	d	file:
+OBJS	makefile	/^OBJS = main.o readwriteppm.o fitness.o randimage.o compimage.o mate.o mutate.o$/;"	m
+PROGRAM_NAME	makefile	/^PROGRAM_NAME= genimg$/;"	m
+PROG_ACC	makefile	/^PROG_ACC=$(PROGRAM_NAME)_acc$/;"	m
+PROG_OMP	makefile	/^PROG_OMP=$(PROGRAM_NAME)_omp$/;"	m
+RANDOM	a3.h	47;"	d
+RET	fitness.c	22;"	d	file:
+RGB	a3.h	/^} RGB;$/;"	t	typeref:struct:__anon1
+b	a3.h	/^  unsigned char r, g, b;$/;"	m	struct:__anon1
+bonusVideo	compimage.c	/^inline void bonusVideo(int g, const char *output_file) {$/;"	f
+compFitness	fitness.c	/^void compFitness(const RGB *A, Individual *B, int wh_product)$/;"	f
+compImage	compimage.c	/^void compImage(const RGB *desired_image, int width, int height, int max,$/;"	f
+fitness	a3.h	/^  double fitness;$/;"	m	struct:__anon2
+fitness	a3.h	/^  int fitness;$/;"	m	struct:__anon3
+fitnessCompare	compimage.c	/^static int fitnessCompare(const void *a, const void *b)$/;"	f	file:
+g	a3.h	/^  unsigned char r, g, b;$/;"	m	struct:__anon1
+image	a3.h	/^  RGB   *image;$/;"	m	struct:__anon2
+main	main.c	/^int main(int argc, char **argv)$/;"	f
+mate	mate.c	/^void mate(Individual *parent1, Individual *parent2,$/;"	f
+monitor	compimage.c	/^inline void monitor(int g, const char *output_file, int width, int height, int max, Individual *ind, double prev_fitness, double *old_time, double *new_time){$/;"	f
+mutate	mutate.c	/^void mutate(Individual *curr, int width, int height, int max)$/;"	f
+pixelDistance	fitness.c	/^inline double pixelDistance(const RGB *a, const RGB *b)$/;"	f
+r	a3.h	/^  unsigned char r, g, b;$/;"	m	struct:__anon1
+randomImage	randimage.c	/^RGB* randomImage(int width, int height, int max)$/;"	f
+readPPM	readwriteppm.c	/^RGB* readPPM(const char *file, int *width, int *height, int *max)$/;"	f
+rgb	a3.h	/^  RGB rgb;$/;"	m	struct:__anon3
+sft	fitness.c	21;"	d	file:
+writePPM	readwriteppm.c	/^void writePPM(const char *file, int width, int height, int max, const RGB *image)$/;"	f
