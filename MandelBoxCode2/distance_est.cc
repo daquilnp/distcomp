@@ -27,7 +27,7 @@ extern float MandelBoxDE(const vec3 &pos, const MandelBoxParams &mPar, float c1,
 //Distance Estimator Field Selector
 float DE(const vec3 &p)
 {
-  //cast added 
+  
   float c1 = fabsf(mandelBox_params.scale - 1.0);
   float c2 = powf( fabsf(mandelBox_params.scale), 1 - mandelBox_params.num_iter);
   float d = MandelBoxDE(p, mandelBox_params, c1, c2);

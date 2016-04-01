@@ -1,0 +1,16 @@
+0.000003
+0.000278
+0.000029
+0.000025
+0.000023
+0.000016
+0.000016	width: 350 height: 325
+
+0.000006	width: 250 height: 368
+0.000013	width: 340 height: 344
+0.000001	width: 240 height: 363
+0.000023	width: 140 height: 396
+0.000020	width: 100 height: 336
+0.000030	width: 130 height: 271
+0.000022	width: 150 height: 286
+0.000026	width: 130 height: 137

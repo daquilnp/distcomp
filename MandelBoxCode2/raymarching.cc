@@ -28,7 +28,7 @@
 extern float DE(const vec3 &p);
 void normal (const vec3 & p, vec3 & normal);
 
-void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps,
+float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps,
 	      pixelData& pix_data)
 {
   float dist = 0.0;
@@ -54,8 +54,16 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
   while (dist > epsModified && totalDist <= render_params.maxDistance && steps < render_params.maxRaySteps);
   
   vec3 hitNormal;
+  
+      // FILE *f;
+
+      // f = fopen("distances.txt", "a");
+      // fprintf(f, "%f\n", dist);
+      // fclose(f);
   if (dist < epsModified) 
     {
+     
+     
       //we didnt escape
       pix_data.escaped = false;
       
@@ -71,6 +79,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
     pix_data.escaped = true;
   
   }
+  return dist;
 }
 
 
