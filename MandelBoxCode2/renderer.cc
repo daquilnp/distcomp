@@ -25,6 +25,7 @@
 #include "camera.h"
 #include "vector3d.h"
 #include "3d.h"
+#include <math.h>
 
 
 extern float getTime();
@@ -34,7 +35,9 @@ extern float rayMarch (const RenderParams &render_params, const vec3 &from, cons
 extern vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
 		      const vec3 &from, const vec3  &direction);
 
-int renderFractal(const CameraParams &camera_params, float *camera_position_changes_array, int frame_no,
+int renderFractal(const CameraParams &camera_params, float *camera_position_array,
+  float *camera_position_changes_array,
+float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   const RenderParams &renderer_params, unsigned char* image)
 {
 
@@ -53,6 +56,8 @@ int renderFractal(const CameraParams &camera_params, float *camera_position_chan
   int *pixel_position_width;
   int *pixel_position_height;
   float step_size = 0.05;
+  float straight[3] = {0,0,0};
+  float left_right[3] = {0,0,0};
   int pin_spacing = 10;
   int check_frame_path = 5;
   distance_to_pixel_array =  (float *)malloc(sizeof(float) * (width*height/pin_spacing));
@@ -110,7 +115,7 @@ int renderFractal(const CameraParams &camera_params, float *camera_position_chan
   int current_max_position_width = pixel_position_width[0];
   int current_max_position_height = pixel_position_height[0];
   for (max_index = 1; max_index < distance_to_pixel_index; max_index++){
-      if (distance_to_pixel_array[max_index] > current_max && distance_to_pixel_array[max_index] < 0.02){
+      if (distance_to_pixel_array[max_index] > current_max && distance_to_pixel_array[max_index] < 400){
           current_max = distance_to_pixel_array[max_index];
           current_max_position_width = pixel_position_width[max_index];
           current_max_position_height = pixel_position_height[max_index];
@@ -129,43 +134,88 @@ int renderFractal(const CameraParams &camera_params, float *camera_position_chan
       }
 
   }
-if (frame_no%check_frame_path == 0 || current_min <= float(0.000010)){
+// if (current_min <= 0.00005){
+//   int clear_position_changes;
+//   for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
+//   camera_position_changes_array[clear_position_changes] = 0;
+//   }
+//   camera_angle_changes_array[0] = step_size*2; 
+//   printf("ITS TURNING!\n\n"); 
+
+// }
+if (frame_no%check_frame_path == 0 || current_min <= 0.0001){
     int clear_position_changes;
     for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
     camera_position_changes_array[clear_position_changes] = 0;
     }
-  
-  if (current_max_position_width < width/2 && current_max_position_height < height/2 ){
-      camera_position_changes_array[0] = camera_position_changes_array[0] - step_size;
-      camera_position_changes_array[1] = camera_position_changes_array[1] + step_size;
-      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
+    float offset_angle = atanf((camera_angle_array[0] -camera_position_array[0])/(camera_angle_array[2] -camera_position_array[2]));
+    // printf("\n tar_z: %f cam_z: %f angle: %f\n",camera_angle_array[2], camera_position_array[2],offset_angle);
+    // float step_size_x = 0.05;
+    // float step_size_y = 0.05;
+    // float step_size_z = 0.05;
+    // float step_size = 0.05;
+    float ratio_scale = 1.57;
+
+    straight[0] = step_size*(sinf(offset_angle)/ratio_scale);
+    straight[1] = 0;//step_size*sinf(offset_angle);
+    straight[2] = step_size*(cosf(offset_angle)/ratio_scale);
+    left_right[0] = step_size*(cosf(offset_angle)/ratio_scale);
+    left_right[1] = 0;//step_size*cosf(offset_angle);
+    left_right[2] = step_size*(sinf(offset_angle)/ratio_scale);
+    // if (frame_no%(check_frame_path*2) == 0){
+    // camera_position_changes_array[0] -= (straight[0]);
+    // camera_position_changes_array[1] += (straight[1]);
+    // camera_position_changes_array[2] -= (straight[2]);
+    // }
+    // else{
+    //   camera_position_changes_array[0] -= (left_right[0]);
+    //   camera_position_changes_array[1] += (left_right[1]);
+    //   camera_position_changes_array[2] -= (left_right[2]);
+    // }
+  if (current_max_position_width <= width/2 && current_max_position_height <= height/2 ){
+      camera_position_changes_array[0] -= (straight[0] + left_right[0]);
+      camera_position_changes_array[1] += (straight[1] + left_right[1]);
+      camera_position_changes_array[2] -= (straight[2] + left_right[2]);
+      camera_angle_changes_array[0] -= step_size*2; 
       printf("\ndistance: %f \t move: top left", current_max);
   }
-  if (current_max_position_width > width/2 && current_max_position_height < height/2 ){
-      camera_position_changes_array[0] = camera_position_changes_array[0] + step_size;
-      camera_position_changes_array[1] = camera_position_changes_array[1] + step_size;
-      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
+  if (current_max_position_width > width/2 && current_max_position_height <= height/2 ){
+      camera_position_changes_array[0] += (straight[0] + left_right[0]);
+      camera_position_changes_array[1] += (straight[1] + left_right[1]);
+      camera_position_changes_array[2] -= (straight[2] + left_right[2]);
+      camera_angle_changes_array[0] += step_size*2; 
+      // camera_position_changes_array[0] = camera_position_changes_array[0] + step_size_x;
+      // camera_position_changes_array[1] = camera_position_changes_array[1] + step_size_y;
+      // camera_position_changes_array[2] = camera_position_changes_array[2] - step_size_z;
       printf("\ndistance: %f \t move: top right", current_max);
   }
-  if (current_max_position_width < width/2 && current_max_position_height > height/2 ){
-      camera_position_changes_array[0] = camera_position_changes_array[0] - step_size;
-      camera_position_changes_array[1] = camera_position_changes_array[1] - step_size;
-      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
+  if (current_max_position_width <= width/2 && current_max_position_height > height/2 ){
+      camera_position_changes_array[0] -= (straight[0] + left_right[0]);
+      camera_position_changes_array[1] -= (straight[1] + left_right[1]);
+      camera_position_changes_array[2] -= (straight[2] + left_right[2]);
+      camera_angle_changes_array[0] -= step_size*2; 
+      // camera_position_changes_array[0] = camera_position_changes_array[0] - step_size_x;
+      // camera_position_changes_array[1] = camera_position_changes_array[1] - step_size_y;
+      // camera_position_changes_array[2] = camera_position_changes_array[2] - step_size_z;
       printf("\ndistance: %f \t move: bottom left", current_max);
   }
   if (current_max_position_width > width/2 && current_max_position_height > height/2 ){
-      camera_position_changes_array[0] = camera_position_changes_array[0] + step_size;
-      camera_position_changes_array[1] = camera_position_changes_array[1] - step_size;
-      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
+      camera_position_changes_array[0] += (straight[0] + left_right[0]);
+      camera_position_changes_array[1] -= (straight[1] + left_right[1]);
+      camera_position_changes_array[2] -= (straight[2] + left_right[2]);
+      camera_angle_changes_array[0] += step_size*2; 
+      // camera_position_changes_array[0] = camera_position_changes_array[0] + step_size_x;
+      // camera_position_changes_array[1] = camera_position_changes_array[1] - step_size_y;
+      // camera_position_changes_array[2] = camera_position_changes_array[2] - step_size_z;
       printf("\ndistance: %f \t move: bottom right", current_max);
   }
 }
 
-  FILE *f;
+  // FILE *f;
 
-  f = fopen("distances.txt", "a");
-  fprintf(f, "%f\twidth: %d height: %d\n", current_min, current_min_position_width, current_min_position_height);
-  fclose(f);
+  // f = fopen("distances.txt", "a");
+  // fprintf(f, "%f\twidth: %d height: %d\n", current_min, current_min_position_width, current_min_position_height);
+  // fclose(f);
   // printf("\ndistance: %f \t pixel_no: %d ", current_max, current_max_position_width);
   printf("\n rendering done:\n");
 

@@ -29,8 +29,9 @@
 
 static char buf[BUF_SIZE];
 
-void getParameters(char *filename, float *camera_position_array, float *camera_position_changes_array, int frame_no,
- CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
+void getParameters(char *filename, float *camera_position_array, float *camera_position_changes_array, 
+	float *camera_angle_array, float *camera_angle_changes_array,
+	 int frame_no, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
 {
   FILE *fp; 
   int ret;
@@ -87,7 +88,26 @@ void getParameters(char *filename, float *camera_position_array, float *camera_p
 	case 1:
 	  //camera target
 	  d = camP->camTarget;
+	  if (frame_no == 0){
 	  sscanf(buf, "%f %f %f", d, d+1, d+2);
+	  	  camera_angle_array[0] = *d;
+		  camera_angle_array[1] = *(d+1);
+		  camera_angle_array[2] = *(d+2);
+	  }
+	  else
+	  {
+		  camera_angle_array[0] = camera_angle_array[0] + camera_angle_changes_array[0];
+		  camera_angle_array[1] = camera_angle_array[1] + camera_angle_changes_array[1];
+		  camera_angle_array[2] = camera_angle_array[2] + camera_angle_changes_array[2];
+
+		  *d  = camera_angle_array[0];
+		  *(d+1) = camera_angle_array[1];
+		  *(d+2) = camera_angle_array[2];
+
+		  printf("Ang_step_x: %f\t Ang_step_y: %f\t Ang_step_z: %f\n", camera_angle_changes_array[0]
+		  	, camera_angle_changes_array[1] , camera_angle_changes_array[2]);
+		  printf("camAng_x: %f\t camAng_y: %f\t camAng_z: %f\n", *d, *(d+1) , *(d+2));
+	  }
 	  break;
 	  //camera up 
 	case 2:
