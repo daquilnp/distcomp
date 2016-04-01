@@ -1,6 +1,6 @@
 # CAMERA
 # location  x,y,z   (7,7,7)
-3.1 2.5 2.3
+4 1 7
 # look_at (target)  x,y,z
 0 1 0 
 # up vector x,y,z;  (0, 1, 3)
@@ -26,4 +26,4 @@
 # super sampling anti aliasing 0 = off, 1 = on
 #0
 # IMAGE FILE NAME
-image.bmp
+frames/image

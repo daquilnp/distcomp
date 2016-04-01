@@ -26,6 +26,7 @@
 #include "vector3d.h"
 #include "3d.h"
 
+
 extern float getTime();
 extern void   printProgress( float perc, float time );
 
@@ -33,8 +34,8 @@ extern float rayMarch (const RenderParams &render_params, const vec3 &from, cons
 extern vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
 		      const vec3 &from, const vec3  &direction);
 
-void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, 
-		   unsigned char* image)
+int renderFractal(const CameraParams &camera_params, float *camera_position_changes_array, int frame_no,
+  const RenderParams &renderer_params, unsigned char* image)
 {
 
   
@@ -47,10 +48,13 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   const int height = renderer_params.height;
   const int width  = renderer_params.width;
 
+  
   float *distance_to_pixel_array;
   int *pixel_position_width;
   int *pixel_position_height;
+  float step_size = 0.05;
   int pin_spacing = 10;
+  int check_frame_path = 5;
   distance_to_pixel_array =  (float *)malloc(sizeof(float) * (width*height/pin_spacing));
   pixel_position_height =  (int *)malloc(sizeof(int) * (width*height/pin_spacing));
   pixel_position_width =  (int *)malloc(sizeof(int) * (width*height/pin_spacing));
@@ -125,19 +129,37 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
       }
 
   }
+if (frame_no%check_frame_path == 0 || current_min <= float(0.000010)){
+    int clear_position_changes;
+    for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
+    camera_position_changes_array[clear_position_changes] = 0;
+    }
   
   if (current_max_position_width < width/2 && current_max_position_height < height/2 ){
+      camera_position_changes_array[0] = camera_position_changes_array[0] - step_size;
+      camera_position_changes_array[1] = camera_position_changes_array[1] + step_size;
+      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
       printf("\ndistance: %f \t move: top left", current_max);
   }
   if (current_max_position_width > width/2 && current_max_position_height < height/2 ){
+      camera_position_changes_array[0] = camera_position_changes_array[0] + step_size;
+      camera_position_changes_array[1] = camera_position_changes_array[1] + step_size;
+      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
       printf("\ndistance: %f \t move: top right", current_max);
   }
   if (current_max_position_width < width/2 && current_max_position_height > height/2 ){
+      camera_position_changes_array[0] = camera_position_changes_array[0] - step_size;
+      camera_position_changes_array[1] = camera_position_changes_array[1] - step_size;
+      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
       printf("\ndistance: %f \t move: bottom left", current_max);
   }
   if (current_max_position_width > width/2 && current_max_position_height > height/2 ){
+      camera_position_changes_array[0] = camera_position_changes_array[0] + step_size;
+      camera_position_changes_array[1] = camera_position_changes_array[1] - step_size;
+      camera_position_changes_array[2] = camera_position_changes_array[2] - step_size;
       printf("\ndistance: %f \t move: bottom right", current_max);
   }
+}
 
   FILE *f;
 
@@ -146,6 +168,28 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   fclose(f);
   // printf("\ndistance: %f \t pixel_no: %d ", current_max, current_max_position_width);
   printf("\n rendering done:\n");
+
+
+  free(distance_to_pixel_array);
+  free(pixel_position_height);
+  free(pixel_position_width);
+
+  // if (current_min <= float(0.000010)){
+  //   camera_position_changes_array[0] = camera_position_changes_array[0] - step_size;
+  //   camera_position_changes_array[1] = camera_position_changes_array[1] + step_size;
+  //   camera_position_changes_array[2] = 0;
+  //   printf("Crashed\n");
+  //   return 1;
+
+  // }
+  // else
+  // {
+  //   // camera_position_changes_array[0] = camera_position_changes_array[0] - 0.05;
+  //   // camera_position_changes_array[1] = camera_position_changes_array[1] - 0.05;
+  //   // camera_position_changes_array[2] = camera_position_changes_array[2] - 0.05;
+  //   printf("current min: %f, Made It\n", current_min);
+    return 1;
+  // }
 }
 
 

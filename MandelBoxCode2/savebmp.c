@@ -22,8 +22,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
-void saveBMP(const char* filename, const unsigned char* result, int w, int h){
+void saveBMP(const char* filename, int frame_no, const unsigned char* result, int w, int h){
 
 	FILE *f;
 	unsigned char *img = NULL;
@@ -47,9 +48,15 @@ void saveBMP(const char* filename, const unsigned char* result, int w, int h){
 	bmpinfoheader[10] = (unsigned char)(       h>>16);
 	bmpinfoheader[11] = (unsigned char)(       h>>24);
 
-	f = fopen(filename,"wb");
+	char filename_str[80];
+	char suffix[15];
+	sprintf(suffix, "%d.bmp", frame_no);
+	strcpy(filename_str, filename);
+	strcat(filename_str, suffix);
+	f = fopen(filename_str,"wb");
 	fwrite(bmpfileheader,1,14,f);
 	fwrite(bmpinfoheader,1,40,f);
+	printf("Writing to: %s\n", filename_str);
 
 	
 	img = (unsigned char *)malloc(3*w);

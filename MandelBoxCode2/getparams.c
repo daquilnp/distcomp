@@ -29,16 +29,15 @@
 
 static char buf[BUF_SIZE];
 
-void getParameters(char *filename, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
+void getParameters(char *filename, float *camera_position_array, float *camera_position_changes_array, int frame_no,
+ CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
 {
   FILE *fp; 
   int ret;
   float *d;
-  
   renP->fractalType = 0;
   renP->maxRaySteps = 8000;
   renP->maxDistance = 1000;
-
   fp = fopen(filename,"r");
   
   if( !fp ) 
@@ -65,7 +64,25 @@ void getParameters(char *filename, CameraParams *camP, RenderParams *renP, Mande
 	  //camera position
 	case 0:
 	  d = camP->camPos;
-	  sscanf(buf, "%f %f %f", d, d+1, d+2);
+	  if (frame_no == 0){
+	  	  sscanf(buf, "%f %f %f", d, d+1, d+2);
+		  camera_position_array[0] = *d;
+		  camera_position_array[1] = *(d+1);
+		  camera_position_array[2] = *(d+2);
+	  }
+	  else{
+		  camera_position_array[0] = camera_position_array[0] + camera_position_changes_array[0];
+		  camera_position_array[1] = camera_position_array[1] + camera_position_changes_array[1];
+		  camera_position_array[2] = camera_position_array[2] + camera_position_changes_array[2];
+		  *d  = camera_position_array[0];
+		  *(d+1) = camera_position_array[1];
+		  *(d+2) = camera_position_array[2];
+		  printf("step_x: %f\t step_y: %f\t step_z: %f\n", camera_position_changes_array[0]
+		  	, camera_position_changes_array[1] , camera_position_changes_array[2]);
+		  printf("camPos_x: %f\t camPos_y: %f\t camPos_z: %f\n", *d, *(d+1) , *(d+2));
+
+	  }
+	  
 	  break;
 	case 1:
 	  //camera target
