@@ -136,43 +136,77 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
       }
 
   }
-// if (current_min <= 0.00005){
-//   int clear_position_changes;
-//   for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
-//   camera_position_changes_array[clear_position_changes] = 0;
-//   }
-//   camera_angle_changes_array[0] = step_size*2; 
-//   printf("ITS TURNING!\n\n"); 
 
-// }
+if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
+    int clear_position_changes;
+    for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
+    camera_position_changes_array[clear_position_changes] = 0;
+    }
+    for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
+    camera_angle_changes_array[clear_position_changes] = 0;
+    }
+
   int on_left = 0;
   if (current_min_position_width <= width/2){
       on_left = 1;
   }
   int num_of_max_counter[5] = {0,0,0,0};
+  int num_of_min_counter[5] = {0,0,0,0};
+
+  for (min_index = 0; min_index < distance_to_pixel_index; min_index++){
+    if(distance_to_pixel_array[min_index] < 0.02){
+      if (pixel_position_width[min_index] <= (width/2) && pixel_position_height[min_index] <= (height/2) 
+      && on_left !=1 && distance_to_pixel_array[min_index] > 1.2*current_min){
+        num_of_min_counter[0] +=1;
+      }
+      else if (pixel_position_width[min_index] > (width/2) && pixel_position_height[min_index] <= (height/2)
+      && on_left ==1 && distance_to_pixel_array[min_index] > 1.2*current_min){
+        num_of_min_counter[1] +=1;
+      }
+      else if (pixel_position_width[min_index] <= (width/2) && pixel_position_height[min_index] > (height/2) 
+      && on_left != 1 && distance_to_pixel_array[min_index] > 1.2*current_min){
+        num_of_min_counter[2] += 1;
+    }
+      else if (pixel_position_width[min_index] > width/2 && pixel_position_height[min_index] > (height/2)
+      && on_left == 1 && distance_to_pixel_array[min_index] > 1.2*current_min){
+        num_of_min_counter[3] += 1;
+      }
+  }
+}
+  int worst_path = 0;
+  int min_counter = num_of_min_counter[0];
+  for (min_index = 1; min_index < 4; min_index++){
+      if (num_of_min_counter[min_index] > min_counter){
+        min_counter = num_of_min_counter[min_index];
+        worst_path = min_index; 
+      }
+
+  }  
+
+
   for (max_index = 0; max_index < distance_to_pixel_index; max_index++){
     if(distance_to_pixel_array[max_index] < 0.02){
-      if (pixel_position_width[max_index] <= (width/2) && pixel_position_height[max_index] <= (height/2) 
-      && on_left !=1 && distance_to_pixel_array[max_index] > 0.85*current_max){
+      if (worst_path != 0 && pixel_position_width[max_index] <= (width/2) && 
+        pixel_position_height[max_index] <= (height/2) && on_left !=1 
+        && distance_to_pixel_array[max_index] > 0.85*current_max ){
         num_of_max_counter[0] +=1;
       }
-      else if (pixel_position_width[max_index] > (width/2) && pixel_position_height[max_index] <= (height/2)
+      else if (worst_path != 1 && pixel_position_width[max_index] > (width/2) && 
+        pixel_position_height[max_index] <= (height/2)
       && on_left ==1 && distance_to_pixel_array[max_index] > 0.85*current_max){
         num_of_max_counter[1] +=1;
       }
-      else if (pixel_position_width[max_index] <= (width/2) && pixel_position_height[max_index] > (height/2) 
+      else if (worst_path != 2 &&
+        pixel_position_width[max_index] <= (width/2) && pixel_position_height[max_index] > (height/2) 
       && on_left != 1 && distance_to_pixel_array[max_index] > 0.85*current_max){
         num_of_max_counter[2] += 1;
     }
-      else if (pixel_position_width[max_index] > width/2 && pixel_position_height[max_index] > (height/2)
+      else if (worst_path != 3 &&
+        pixel_position_width[max_index] > width/2 && pixel_position_height[max_index] > (height/2)
       && on_left == 1 && distance_to_pixel_array[max_index] > 0.85*current_max){
         num_of_max_counter[3] += 1;
       }
-      // else if (pixel_position_width[max_index] < (width/2+width/5) && pixel_position_width[max_index] > (width/2-width/5) &&
-      // pixel_position_height[max_index] < (height/2+height/5) && pixel_position_height[max_index] > (height/2-height/5) &&
-      // on_left == 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
-      //   num_of_max_counter[4] += 1;
-      // }
+
     }
   }
   int best_path = 0;
@@ -184,14 +218,7 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
       }
 
   }  
-if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
-    int clear_position_changes;
-    for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
-    camera_position_changes_array[clear_position_changes] = 0;
-    }
-    for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
-    camera_angle_changes_array[clear_position_changes] = 0;
-    }
+
 
     float offset_angle = atanf((camera_angle_array[0] -camera_position_array[0])/(camera_angle_array[2] -camera_position_array[2]));
 
