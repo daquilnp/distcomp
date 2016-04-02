@@ -55,7 +55,7 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   float *distance_to_pixel_array;
   int *pixel_position_width;
   int *pixel_position_height;
-  float step_size = 0.05;
+  float step_size = 0.01;
   float straight[3] = {0,0,0};
   float left_right[3] = {0,0,0};
   float up_down[3] = {0,0,0};
@@ -115,6 +115,7 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   float current_max = distance_to_pixel_array[0];
   int current_max_position_width = pixel_position_width[0];
   int current_max_position_height = pixel_position_height[0];
+ 
   for (max_index = 1; max_index < distance_to_pixel_index; max_index++){
       if (distance_to_pixel_array[max_index] > current_max && distance_to_pixel_array[max_index] < 0.02){
           current_max = distance_to_pixel_array[max_index];
@@ -144,7 +145,46 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
 //   printf("ITS TURNING!\n\n"); 
 
 // }
-if (frame_no%check_frame_path == 0 || current_min <= 0.0004){
+  int on_left = 0;
+  if (current_min_position_width <= width/2){
+      on_left = 1;
+  }
+  int num_of_max_counter[5] = {0,0,0,0,0};
+  for (max_index = 0; max_index < distance_to_pixel_index; max_index++){
+    if(distance_to_pixel_array[max_index] < 0.02){
+      if (pixel_position_width[max_index] <= (width/2-width/5) && pixel_position_height[max_index] <= (height/2-height/5) 
+      && on_left !=1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+        num_of_max_counter[0] +=1;
+      }
+      else if (pixel_position_width[max_index] > (width/2+width/5) && pixel_position_height[max_index] <= (height/2-height/5)
+      && on_left ==1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+        num_of_max_counter[1] +=1;
+      }
+      else if (pixel_position_width[max_index] <= (width/2-width/5) && pixel_position_height[max_index] > (height/2+height/5) 
+      && on_left != 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+        num_of_max_counter[2] += 1;
+    }
+      else if (pixel_position_width[max_index] > (width/2+width/5) && pixel_position_height[max_index] > (height/2+height/5) 
+      && on_left == 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+        num_of_max_counter[3] += 1;
+      }
+      else if (pixel_position_width[max_index] < (width/2+width/5) && pixel_position_width[max_index] > (width/2-width/5) &&
+      pixel_position_height[max_index] < (height/2+height/5) && pixel_position_height[max_index] > (height/2-height/5) &&
+      on_left == 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+        num_of_max_counter[4] += 1;
+      }
+    }
+  }
+  int best_path = 0;
+  int max_counter = num_of_max_counter[0];
+  for (max_index = 1; max_index < 5; max_index++){
+      if (num_of_max_counter[max_index] > max_counter){
+        max_counter = num_of_max_counter[max_index];
+        best_path = max_index; 
+      }
+
+  }  
+if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
     int clear_position_changes;
     for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
     camera_position_changes_array[clear_position_changes] = 0;
@@ -152,16 +192,9 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.0004){
     for (clear_position_changes = 0; clear_position_changes < 3; clear_position_changes++){
     camera_angle_changes_array[clear_position_changes] = 0;
     }
-    int on_left = 0;
-    if (current_min_position_width <= width/2){
-      on_left = 1;
-    }
+
     float offset_angle = atanf((camera_angle_array[0] -camera_position_array[0])/(camera_angle_array[2] -camera_position_array[2]));
-    // printf("\n tar_z: %f cam_z: %f angle: %f\n",camera_angle_array[2], camera_position_array[2],offset_angle);
-    // float step_size_x = 0.05;
-    // float step_size_y = 0.05;
-    // float step_size_z = 0.05;
-    // float step_size = 0.05;
+
     float ratio_scale = 1.57;
 
     straight[0] = step_size*(sinf(offset_angle)/ratio_scale);
@@ -171,18 +204,8 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.0004){
     left_right[1] = 0;//step_size*cosf(offset_angle);
     left_right[2] = step_size*(sinf(offset_angle)/ratio_scale);
     up_down[1] = step_size;
-    // if (frame_no%(check_frame_path*2) == 0){
-    // camera_position_changes_array[0] -= (straight[0]);
-    // camera_position_changes_array[1] += (straight[1]);
-    // camera_position_changes_array[2] -= (straight[2]);
-    // }
-    // else{
-    //   camera_position_changes_array[0] -= (left_right[0]);
-    //   camera_position_changes_array[1] += (left_right[1]);
-    //   camera_position_changes_array[2] -= (left_right[2]);
-    // }
-  if (current_max_position_width <= (width/2-width/5) && current_max_position_height <= (height/2-height/5) 
-    && on_left !=1){
+
+  if (best_path == 0){
       camera_position_changes_array[0] -= (straight[0] + left_right[0]);
       camera_position_changes_array[1] += (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
@@ -193,8 +216,7 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.0004){
       printf("\ndistance: %f \t move: top left", current_max);
   }
 
-  else if (current_max_position_width > (width/2+width/5) && current_max_position_height <= (height/2-height/5
-    && on_left ==1)){
+  else if (best_path == 1){
       camera_position_changes_array[0] += (straight[0] + left_right[0]);
       camera_position_changes_array[1] += (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
@@ -206,8 +228,7 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.0004){
       // camera_position_changes_array[2] = camera_position_changes_array[2] - step_size_z;
       printf("\ndistance: %f \t move: top right", current_max);
   }
-  else if (current_max_position_width <= (width/2-width/5) && current_max_position_height > (height/2+height/5) 
-    && on_left != 1){
+  else if (best_path == 2){
       camera_position_changes_array[0] -= (straight[0] + left_right[0]);
       camera_position_changes_array[1] -= (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
@@ -221,8 +242,7 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.0004){
       // camera_position_changes_array[2] = camera_position_changes_array[2] - step_size_z;
       printf("\ndistance: %f \t move: bottom left", current_max);
   }
-  else if (current_max_position_width > (width/2+width/5) && current_max_position_height > (height/2+height/5) 
-    && on_left == 1){
+  else if (best_path == 3){
       camera_position_changes_array[0] += (straight[0] + left_right[0]);
       camera_position_changes_array[1] -= (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
