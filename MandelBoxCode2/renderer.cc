@@ -149,35 +149,35 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   if (current_min_position_width <= width/2){
       on_left = 1;
   }
-  int num_of_max_counter[5] = {0,0,0,0,0};
+  int num_of_max_counter[5] = {0,0,0,0};
   for (max_index = 0; max_index < distance_to_pixel_index; max_index++){
     if(distance_to_pixel_array[max_index] < 0.02){
-      if (pixel_position_width[max_index] <= (width/2-width/5) && pixel_position_height[max_index] <= (height/2-height/5) 
-      && on_left !=1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+      if (pixel_position_width[max_index] <= (width/2) && pixel_position_height[max_index] <= (height/2) 
+      && on_left !=1 && distance_to_pixel_array[max_index] > 0.85*current_max){
         num_of_max_counter[0] +=1;
       }
-      else if (pixel_position_width[max_index] > (width/2+width/5) && pixel_position_height[max_index] <= (height/2-height/5)
-      && on_left ==1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+      else if (pixel_position_width[max_index] > (width/2) && pixel_position_height[max_index] <= (height/2)
+      && on_left ==1 && distance_to_pixel_array[max_index] > 0.85*current_max){
         num_of_max_counter[1] +=1;
       }
-      else if (pixel_position_width[max_index] <= (width/2-width/5) && pixel_position_height[max_index] > (height/2+height/5) 
-      && on_left != 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+      else if (pixel_position_width[max_index] <= (width/2) && pixel_position_height[max_index] > (height/2) 
+      && on_left != 1 && distance_to_pixel_array[max_index] > 0.85*current_max){
         num_of_max_counter[2] += 1;
     }
-      else if (pixel_position_width[max_index] > (width/2+width/5) && pixel_position_height[max_index] > (height/2+height/5) 
-      && on_left == 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+      else if (pixel_position_width[max_index] > width/2 && pixel_position_height[max_index] > (height/2)
+      && on_left == 1 && distance_to_pixel_array[max_index] > 0.85*current_max){
         num_of_max_counter[3] += 1;
       }
-      else if (pixel_position_width[max_index] < (width/2+width/5) && pixel_position_width[max_index] > (width/2-width/5) &&
-      pixel_position_height[max_index] < (height/2+height/5) && pixel_position_height[max_index] > (height/2-height/5) &&
-      on_left == 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
-        num_of_max_counter[4] += 1;
-      }
+      // else if (pixel_position_width[max_index] < (width/2+width/5) && pixel_position_width[max_index] > (width/2-width/5) &&
+      // pixel_position_height[max_index] < (height/2+height/5) && pixel_position_height[max_index] > (height/2-height/5) &&
+      // on_left == 1 && distance_to_pixel_array[max_index] > 0.35*current_max){
+      //   num_of_max_counter[4] += 1;
+      // }
     }
   }
   int best_path = 0;
   int max_counter = num_of_max_counter[0];
-  for (max_index = 1; max_index < 5; max_index++){
+  for (max_index = 1; max_index < 4; max_index++){
       if (num_of_max_counter[max_index] > max_counter){
         max_counter = num_of_max_counter[max_index];
         best_path = max_index; 
@@ -209,7 +209,7 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
       camera_position_changes_array[0] -= (straight[0] + left_right[0]);
       camera_position_changes_array[1] += (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
-      camera_angle_changes_array[0] -= 2*(straight[0] + left_right[0]);
+      camera_angle_changes_array[0] -= 5*(straight[0] + left_right[0]);
       camera_angle_changes_array[1] += (straight[1] + left_right[1] + up_down[1]);
       camera_angle_changes_array[2] -= 2*(straight[2] + left_right[2]);
 
@@ -220,7 +220,7 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
       camera_position_changes_array[0] += (straight[0] + left_right[0]);
       camera_position_changes_array[1] += (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
-      camera_angle_changes_array[0] += 2*(straight[0] + left_right[0]);
+      camera_angle_changes_array[0] += 5*(straight[0] + left_right[0]);
       camera_angle_changes_array[1] += (straight[1] + left_right[1] + up_down[1]);
       camera_angle_changes_array[2] -= 2*(straight[2] + left_right[2]);
       // camera_position_changes_array[0] = camera_position_changes_array[0] + step_size_x;
@@ -232,7 +232,7 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
       camera_position_changes_array[0] -= (straight[0] + left_right[0]);
       camera_position_changes_array[1] -= (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
-      camera_angle_changes_array[0] -= 2*(straight[0] + left_right[0]);
+      camera_angle_changes_array[0] -= 5*(straight[0] + left_right[0]);
       camera_angle_changes_array[1] -= (straight[1] + left_right[1] + up_down[1]);
       camera_angle_changes_array[2] -= 2*(straight[2] + left_right[2]);
 
@@ -246,7 +246,7 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
       camera_position_changes_array[0] += (straight[0] + left_right[0]);
       camera_position_changes_array[1] -= (straight[1] + left_right[1] + up_down[1]);
       camera_position_changes_array[2] -= (straight[2] + left_right[2]);
-      camera_angle_changes_array[0] += 2*(straight[0] + left_right[0]);
+      camera_angle_changes_array[0] += 5*(straight[0] + left_right[0]);
       camera_angle_changes_array[1] -= (straight[1] + left_right[1] + up_down[1]);
       camera_angle_changes_array[2] -= 2*(straight[2] + left_right[2]);
      
@@ -255,15 +255,15 @@ if (frame_no%check_frame_path == 0 || current_min <= 0.00015){
       // camera_position_changes_array[2] = camera_position_changes_array[2] - step_size_z;
       printf("\ndistance: %f \t move: bottom right", current_max);
   }
-  else
-  {
-      camera_position_changes_array[0] += (straight[0]);
-      camera_position_changes_array[1] -= (straight[1]);
-      camera_position_changes_array[2] -= (straight[2]);
-      camera_angle_changes_array[0] += (straight[0]);
-      camera_angle_changes_array[1] -= (straight[1]);
-      camera_angle_changes_array[2] -= (straight[2]);
-  }
+  // else
+  // {
+  //     camera_position_changes_array[0] += (straight[0]);
+  //     camera_position_changes_array[1] -= (straight[1]);
+  //     camera_position_changes_array[2] -= (straight[2]);
+  //     camera_angle_changes_array[0] += (straight[0]);
+  //     camera_angle_changes_array[1] -= (straight[1]);
+  //     camera_angle_changes_array[2] -= (straight[2]);
+  // }
 }
 
   // FILE *f;
