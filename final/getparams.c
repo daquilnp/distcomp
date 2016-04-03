@@ -80,7 +80,7 @@ void getParameters(char *filename, float *camera_position_array, float *camera_p
 		  *(d+2) = camera_position_array[2];
 		  // printf("step_x: %f\t step_y: %f\t step_z: %f\n", camera_position_changes_array[0]
 		  // 	, camera_position_changes_array[1] , camera_position_changes_array[2]);
-		  printf("camPos_x: %f\t camPos_y: %f\t camPos_z: %f\n", *d, *(d+1) , *(d+2));
+		  printf("camPos: %f %f %f\n", *d, *(d+1) , *(d+2));
 
 	  }
 	  
@@ -105,7 +105,7 @@ void getParameters(char *filename, float *camera_position_array, float *camera_p
 
 		  // printf("Ang_step_x: %f\t Ang_step_y: %f\t Ang_step_z: %f\n", camera_angle_changes_array[0]
 		  // 	, camera_angle_changes_array[1] , camera_angle_changes_array[2]);
-		  printf("camAng_x: %f\t camAng_y: %f\t camAng_z: %f\n", *d, *(d+1) , *(d+2));
+		  printf("camAng: %f %f %f\n", *d, *(d+1) , *(d+2));
 	  }
 	  break;
 	  //camera up 

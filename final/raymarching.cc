@@ -53,14 +53,6 @@ float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  
     }
   while (dist > epsModified && totalDist <= render_params.maxDistance && steps < render_params.maxRaySteps);
   
-  vec3 hitNormal;
-  
-      // FILE *f;
-
-
-      // f = fopen("distances.txt", "a");
-      // fprintf(f, "%f\n", dist);
-      // fclose(f);
   if (dist < epsModified) 
     {
      
@@ -73,10 +65,10 @@ float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  
       
       //figure out the normal of the surface at this point
       const vec3 normPos = p - direction * epsModified;
-
+      
       // printf("normPos: x: %f y: %f z: %f\n", normPos.x, normPos.y, normPos.z);
       normal(normPos, pix_data.normal);
-      vector_of_pixel = normPos;
+      
       
 
   
@@ -84,13 +76,11 @@ float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  
   else {
     //we have the background colour
     pix_data.escaped = true;
-    // if(vector_of_pixel.x == 0 && vector_of_pixel.y == 0 && vector_of_pixel.z == 0){
-
-    //   printf("\nnormPos = 0\n");
-    //  }
+    // printf("x: %f y: %f z: %f\n", vector_of_pixel.x, vector_of_pixel.y, vector_of_pixel.z );
   }
+  vector_of_pixel = pix_data.hit;
 
-  return dist;
+  return dist; 
 }
 
 
