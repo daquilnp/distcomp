@@ -34,10 +34,10 @@ extern void   printProgress( float perc, float time );
 extern float rayMarch (const RenderParams &render_params, const vec3 &from, const vec3  &to, float eps, pixelData &pix_data,
   vec3 &vector_of_pixel);
 extern vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
-		      const vec3 &from, const vec3  &direction);
+          const vec3 &from, const vec3  &direction);
 
 int renderFractal(const CameraParams &camera_params, float *camera_position_array,
-  float *camera_position_changes_array,
+  float *camera_position_changes_array, int move_position,
 float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   const RenderParams &renderer_params, unsigned char* image)
 {
@@ -76,19 +76,19 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
     {
       //for each column pixel in the row
       for(i = 0; i <width; i++)
-	{
-  	  // get point on the 'far' plane
-  	  // since we render one frame only, we can use the more specialized method
-  	  UnProject(i, j, camera_params, farPoint);
+  {
+      // get point on the 'far' plane
+      // since we render one frame only, we can use the more specialized method
+      UnProject(i, j, camera_params, farPoint);
 
 
-  	  // to = farPoint - camera_params.camPos
-  	  to = Subtractfloatfloat(farPoint,camera_params.camPos);
+      // to = farPoint - camera_params.camPos
+      to = Subtractfloatfloat(farPoint,camera_params.camPos);
       
-  	  to.Normalize();
-  	  vec3 test_vector;
-  	  //render the pixel
-  	  float distance_to_pixel = rayMarch(renderer_params, from, to, eps, pix_data, test_vector);
+      to.Normalize();
+      vec3 test_vector;
+      //render the pixel
+      float distance_to_pixel = rayMarch(renderer_params, from, to, eps, pix_data, test_vector);
 
       if (i%pin_spacing == 0 && j%pin_spacing == 0){
 
@@ -100,63 +100,89 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
 
         distance_to_pixel_index++; 
 
-	  }
+    }
 
       //get the colour at this pixel
-  	  color = getColour(pix_data, renderer_params, from, to);
+      color = getColour(pix_data, renderer_params, from, to);
         
-  	  //save colour into texture
-  	  k = (j * width + i)*3;
-  	  image[k+2] = (unsigned char)(color.x * 255);
-  	  image[k+1] = (unsigned char)(color.y * 255);
-  	  image[k]   = (unsigned char)(color.z * 255);
+      //save colour into texture
+      k = (j * width + i)*3;
+      image[k+2] = (unsigned char)(color.x * 255);
+      image[k+1] = (unsigned char)(color.y * 255);
+      image[k]   = (unsigned char)(color.z * 255);
       pixel_count++;
-	}
+  }
       printProgress((j+1)/(float)height,getTime()-time);
 
     }
 
-float vector_distance = sqrtf(powf(camera_angle_array[0] -camera_position_array[0],2)
+if (move_position == 1){
+  float vector_distance = sqrtf(powf(camera_angle_array[0] -camera_position_array[0],2)
      + powf(camera_angle_array[1] -camera_position_array[1],2) + powf(camera_angle_array[3] -camera_position_array[3],2));
 
-float t = step_size/vector_distance;
-
-if ( vector_distance < 0.4 || frame_no == 0){
-
-  int max_index = 0;
-  int found_flag = 0;
-  float current_max = 0;
-  float current_max_distance = 0;
-  vec3 current_max_vector_point; 
-  while (found_flag == 0){
-    
-      if (distance_to_pixel_array[max_index] < 0.0002){
-          current_max = distance_to_pixel_array[max_index];
-          current_max_vector_point = distance_vector_points[max_index];
-          current_max_distance = distance_to_point_array[max_index];
-          found_flag = 1;
-      }
-      max_index++;
-  }
-  
-  for (;max_index < distance_to_pixel_index; max_index++){
-      if (distance_to_pixel_array[max_index] > current_max && distance_to_pixel_array[max_index] < 0.0002){
-          current_max = distance_to_pixel_array[max_index];
-          current_max_vector_point = distance_vector_points[max_index];
-          current_max_distance = distance_to_point_array[max_index];        
-      }
-
-  }
-
-  camera_angle_array[0] = current_max_vector_point.x;
-  camera_angle_array[1] = current_max_vector_point.y;
-  camera_angle_array[2] = current_max_vector_point.z;
-
-}
-
+  float t = step_size/vector_distance;
   camera_position_array[0] += t*(camera_angle_array[0]-camera_position_array[0]);
   camera_position_array[1] += t*(camera_angle_array[1]-camera_position_array[1]);
   camera_position_array[2] += t*(camera_angle_array[2]-camera_position_array[2]);
+  printf("Moving Position\n");
+    if ( vector_distance < 0.4 || frame_no == 0){
+      move_position = 0;
+      int max_index = 0;
+      int found_flag = 0;
+      float current_max = 0;
+      float current_max_distance = 0;
+      vec3 current_max_vector_point; 
+      while (found_flag == 0){
+        
+          if (distance_to_pixel_array[max_index] < 0.0002){
+              current_max = distance_to_pixel_array[max_index];
+              current_max_vector_point = distance_vector_points[max_index];
+              current_max_distance = distance_to_point_array[max_index];
+              found_flag = 1;
+          }
+          max_index++;
+      }
+      
+      for (;max_index < distance_to_pixel_index; max_index++){
+          if (distance_to_pixel_array[max_index] > current_max && distance_to_pixel_array[max_index] < 0.0002){
+              current_max = distance_to_pixel_array[max_index];
+              current_max_vector_point = distance_vector_points[max_index];
+              current_max_distance = distance_to_point_array[max_index];        
+          }
+
+      }
+      camera_angle_changes_array[0] = current_max_vector_point.x;
+      camera_angle_changes_array[1] = current_max_vector_point.y;
+      camera_angle_changes_array[2] = current_max_vector_point.z;
+      
+      printf("Switch to Angle, move_position: %d\n", move_position);
+
+    }
+
+}
+else
+{
+float vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_angle_array[0],2)
+     + powf(camera_angle_changes_array[1] -camera_angle_array[1],2) 
+     + powf(camera_angle_changes_array[3] -camera_angle_array[3],2));
+
+  float t = 20*step_size/vector_distance;
+  if (vector_distance < 0.1 ){
+    camera_angle_array[0] = camera_angle_changes_array[0];
+    camera_angle_array[1] = camera_angle_changes_array[1];
+    camera_angle_array[2] = camera_angle_changes_array[2];
+
+    move_position = 1;
+    printf("Switch to Position, frame# %d\n", frame_no);
+  }
+  camera_angle_array[0] += t*(camera_angle_changes_array[0]-camera_angle_array[0]);
+  camera_angle_array[1] += t*(camera_angle_changes_array[1]-camera_angle_array[1]);
+  camera_angle_array[2] += t*(camera_angle_changes_array[2]-camera_angle_array[2]);
+
+  printf("Moving Angle\n");
+}
+
+
 
   printf("\n rendering done:\n");
 
@@ -165,7 +191,7 @@ if ( vector_distance < 0.4 || frame_no == 0){
   free(distance_to_point_array);
 
 
-    return 1;
+    return move_position;
 }
 
 

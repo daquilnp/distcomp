@@ -29,7 +29,7 @@ extern float DE(const vec3 &p);
 void normal (const vec3 & p, vec3 & normal);
 
 float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps,
-	      pixelData& pix_data, vec3 &vector_of_pixel)
+        pixelData& pix_data, vec3 &vector_of_pixel)
 {
   float dist = 0.0;
   float totalDist = 0.0;
