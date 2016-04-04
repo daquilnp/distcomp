@@ -54,7 +54,7 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   float *distance_to_pixel_array;
   float *distance_to_point_array;
   vec3 *distance_vector_points;
-  float step_size = 0.02;
+  float step_size = 0.01;
  
 
   int pin_spacing = 5;
@@ -124,7 +124,7 @@ if (move_position == 1){
   camera_position_array[0] += t*(camera_angle_array[0]-camera_position_array[0]);
   camera_position_array[1] += t*(camera_angle_array[1]-camera_position_array[1]);
   camera_position_array[2] += t*(camera_angle_array[2]-camera_position_array[2]);
-  printf("Moving Position\n");
+ 
     if ( vector_distance < 0.4 || frame_no == 0){
       move_position = 0;
       int max_index = 0;
@@ -155,7 +155,7 @@ if (move_position == 1){
       camera_angle_changes_array[1] = current_max_vector_point.y;
       camera_angle_changes_array[2] = current_max_vector_point.z;
       
-      printf("Switch to Angle, move_position: %d\n", move_position);
+      
 
     }
 
@@ -166,20 +166,20 @@ float vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_angle_a
      + powf(camera_angle_changes_array[1] -camera_angle_array[1],2) 
      + powf(camera_angle_changes_array[3] -camera_angle_array[3],2));
 
-  float t = 20*step_size/vector_distance;
-  if (vector_distance < 0.1 ){
+  float t = 0.10;//*(step_size/vector_distance);
+  if (vector_distance < 0.05 ){
     camera_angle_array[0] = camera_angle_changes_array[0];
     camera_angle_array[1] = camera_angle_changes_array[1];
     camera_angle_array[2] = camera_angle_changes_array[2];
 
     move_position = 1;
-    printf("Switch to Position, frame# %d\n", frame_no);
+    
   }
   camera_angle_array[0] += t*(camera_angle_changes_array[0]-camera_angle_array[0]);
   camera_angle_array[1] += t*(camera_angle_changes_array[1]-camera_angle_array[1]);
   camera_angle_array[2] += t*(camera_angle_changes_array[2]-camera_angle_array[2]);
 
-  printf("Moving Angle\n");
+ 
 }
 
 

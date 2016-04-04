@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 
   move_position = renderFractal(camera_params, camera_position_array, camera_position_changes_array, move_position,
     camera_angle_array, camera_angle_changes_array, frame_counter, renderer_params, image);
-  printf("\non exit, move_position: %d", move_position);
+  
   saveBMP(renderer_params.file_name , frame_counter, image, renderer_params.width, renderer_params.height);
   
   free(image);
