@@ -20,75 +20,79 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "omp.h"
+
 #include "color.h"
 #include "mandelbox.h"
 #include "camera.h"
 #include "vector3d.h"
 #include "3d.h"
-#include <math.h>
-
+#include "getcolor.h"
+#include "math.h"
 
 extern float getTime();
 extern void   printProgress( float perc, float time );
 
-extern float rayMarch (const RenderParams &render_params, const vec3 &from, const vec3  &to, float eps, pixelData &pix_data,
-  vec3 &vector_of_pixel);
+extern float getTime();
+extern void   printProgress( float perc, float time );
+
+extern float rayMarch (const RenderParams &render_params, const vec3 &from, 
+const vec3  &to, float eps, pixelData &pix_data, MandelBoxParams &mandelBox_params);
+
 extern vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
-          const vec3 &from, const vec3  &direction);
+		      const vec3 &from, const vec3  &direction);
 
 int renderFractal(const CameraParams &camera_params, float *camera_position_array,
   float *camera_position_changes_array, int move_position,
 float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
-  const RenderParams &renderer_params, unsigned char* image)
+  const RenderParams &renderer_params, unsigned char* image,
+ MandelBoxParams &mandelBox_params)
 {
-  const float eps = powf(10.0, renderer_params.detail); 
-  float farPoint[3];
-  vec3 to, from, test_vector;
+  const float eps = pow(10.0, renderer_params.detail); 
+  vec3 from;
   
-  from.SetfloatPoint(camera_params.camPos);
+  SET_POINT(from,camera_params.camPos)
   
   const int height = renderer_params.height;
   const int width  = renderer_params.width;
-
-  
+  int j;
+  //float time = getTime();
   float *distance_to_pixel_array;
   float *distance_to_point_array;
   vec3 *distance_vector_points;
   float step_size = 0.01;
- 
-
   int pin_spacing = 5;
   // int check_frame_path = 30;
   distance_to_pixel_array =  (float *)malloc(sizeof(float) * (width*height/pin_spacing));
   distance_to_point_array =  (float *)malloc(sizeof(float) * (width*height/pin_spacing));
   distance_vector_points =  (vec3 *)malloc(sizeof(vec3) * (width*height/pin_spacing));
+   int pixel_count = 0;
+   int distance_to_pixel_index = 0; 
+#pragma omp parallel for default(shared) schedule(dynamic) num_threads(4)
+  for(j = 0; j < height; j++){
+      int i=0;  
+      for(i = 0; i <width; i++){
+	  pixelData pix_data;
+  	  vec3 color;
+	  float farPoint[3];
+	  vec3 to;
 
-  pixelData pix_data;
-  
-  float time = getTime();
-  vec3 color;
-  
-  int i,j,k;
-  int pixel_count = 0;
-  int distance_to_pixel_index = 0;
+	  foo();
 
-  for(j = 0; j < height; j++)
-    {
-      //for each column pixel in the row
-      for(i = 0; i <width; i++)
-  {
-      // get point on the 'far' plane
-      // since we render one frame only, we can use the more specialized method
-      UnProject(i, j, camera_params, farPoint);
-
-
-      // to = farPoint - camera_params.camPos
-      to = Subtractfloatfloat(farPoint,camera_params.camPos);
+	  // get point on the 'far' plane
+	  // since we render one frame only, 
+	  // we can use the more specialized method
+	  UnProject(i, j, camera_params, farPoint);
+	  
+	  // to = farPoint - camera_params.camPos
+          to = SUBDUBDUB(farPoint, camera_params.camPos);
+	  NORMALIZE(to);
+	  
+	  //render the pixel
       
-      to.Normalize();
-      vec3 test_vector;
       //render the pixel
-      float distance_to_pixel = rayMarch(renderer_params, from, to, eps, pix_data, test_vector);
+      float distance_to_pixel = rayMarch(renderer_params, from, to, eps, pix_data, mandelBox_params);
 
       if (i%pin_spacing == 0 && j%pin_spacing == 0){
 
@@ -99,22 +103,20 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
         distance_to_point_array[distance_to_pixel_index] = new_distance;
 
         distance_to_pixel_index++; 
+	}
 
-    }
+	  //get the colour at this pixel
+	  color = getColour(pix_data, renderer_params, from, to);
 
-      //get the colour at this pixel
-      color = getColour(pix_data, renderer_params, from, to);
-        
-      //save colour into texture
-      k = (j * width + i)*3;
-      image[k+2] = (unsigned char)(color.x * 255);
-      image[k+1] = (unsigned char)(color.y * 255);
-      image[k]   = (unsigned char)(color.z * 255);
-      pixel_count++;
-  }
-      printProgress((j+1)/(float)height,getTime()-time);
-
-    }
+	  //save colour into texture
+	  int k = (j * width + i)*3;
+	  image[k+2] = (unsigned char)(color.x * 255);
+	  image[k+1] = (unsigned char)(color.y * 255);
+	  image[k]   = (unsigned char)(color.z * 255);
+	  pixel_count++;
+	} // inner for
+      //printProgress((j+1)/(float)height,getTime()-time);
+    }//end of outer for
 
 if (move_position == 1){
   float vector_distance = sqrtf(powf(camera_angle_array[0] -camera_position_array[0],2)
@@ -181,9 +183,6 @@ float vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_angle_a
 
  
 }
-
-
-
   printf("\n rendering done:\n");
 
 
@@ -193,8 +192,3 @@ float vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_angle_a
 
     return move_position;
 }
-
-
-
-
-

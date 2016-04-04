@@ -45,6 +45,5 @@ void init3D(CameraParams *camP, const RenderParams *renP)
   float temp[16];
   MultiplyMatrices(temp, camP->matProjection, camP->matModelView);
   //Now compute the inverse of matrix A
-  
   InvertMatrix(temp, camP->matInvProjModel);
 }

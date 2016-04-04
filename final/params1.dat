@@ -1,16 +1,16 @@
 # CAMERA
-# location  x,y,z   (7,7,7) (3.2, 1, 6) 1.922303 1.230000 2.876038
-1.922303 1.230000 2.876038
+# location  x,y,z   (7,7,7)
+7 1 7 
 # look_at (target)  x,y,z
 0 1 0 
-# up vector x,y,z;  (0, 1, 3)
+# up vector x,y,z;  (0, 1, 0)
 0 1 0
 # field of view     (1)
 1.1  
 # IMAGE
 # width height
-#3840 2160 (800 600)
-400 400
+#3840 2160
+800 600
 # detail level, the smaller the more detailed (-3)
 -3.5
 # MANDELBOX
@@ -24,6 +24,6 @@
 # brightness
 1.2
 # super sampling anti aliasing 0 = off, 1 = on
-#0
+0
 # IMAGE FILE NAME
-frames/image
+image.bmp

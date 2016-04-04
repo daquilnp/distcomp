@@ -27,18 +27,21 @@
 
 #define BUF_SIZE 1024
 
-static char buf[BUF_SIZE];
+
 
 void getParameters(char *filename, float *camera_position_array, float *camera_position_changes_array, 
 	float *camera_angle_array, float *camera_angle_changes_array,
 	 int frame_no, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
 {
-  FILE *fp; 
+  FILE *fp;
   int ret;
   float *d;
+  char buf[BUF_SIZE];
+  
   renP->fractalType = 0;
   renP->maxRaySteps = 8000;
   renP->maxDistance = 1000;
+
   fp = fopen(filename,"r");
   
   if( !fp ) 

@@ -39,15 +39,8 @@ int UnProject(float winX, float winY, CameraParams camP, float *obj)
   in[3]=1.0;
   
   //Objects coordinates
-  //cast added
-  // int iter = 0;
-  // float matInvProjModel_float[16];
-  // for (iter = 0; iter < 16; iter++)
-  //   matInvProjModel_float[iter]= (float)camP.matInvProjModel[iter];
   MultiplyMatrixByVector(out, camP.matInvProjModel, in);
   
-
-
   if(out[3]==0.0)
     return 0;
 

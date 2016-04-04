@@ -24,13 +24,37 @@
 
 #include "color.h"
 #include "renderer.h"
+#include "mandelboxde.h"
 
-extern float DE(const vec3 &p);
-void normal (const vec3 & p, vec3 & normal);
+extern float DE(const vec3 &p, MandelBoxParams &mandelBox_params);
 
-float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps,
-        pixelData& pix_data, vec3 &vector_of_pixel)
+static inline void normal(const vec3 & p, vec3 & normal, MandelBoxParams &mandelBox_params)
 {
+  // compute the normal at p
+  const float sqrt_mach_eps = 3.4527e-04;// 1.4901e-08;
+
+  float eps = std::max( MAGNITUDE_RET(p), 1.0 )*sqrt_mach_eps;
+
+  vec3 e1 = {eps, 0,   0};
+  vec3 e2 = {0  , eps, 0};
+  vec3 e3 = {0  , 0, eps};
+
+  vec3 ppe1 = PLUS(p, e1);
+  vec3 pme1 = SUB(p, e1);
+  vec3 ppe2 = PLUS(p, e2);
+  vec3 pme2 = SUB(p, e2);
+  vec3 ppe3 = PLUS(p, e3);
+  vec3 pme3 = SUB(p, e3);
+
+  normal = {DE(ppe1,mandelBox_params)-DE(pme1,mandelBox_params), DE(ppe2,mandelBox_params)-DE(pme2,mandelBox_params), DE(ppe3,mandelBox_params)-DE(pme3,mandelBox_params)};
+  
+  NORMALIZE(normal);
+}
+
+float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps, pixelData& pix_data
+, MandelBoxParams &mandelBox_params)
+{
+
   float dist = 0.0;
   float totalDist = 0.0;
   
@@ -42,8 +66,10 @@ float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  
   vec3 p;
   do 
     {      
-      p = from + direction * totalDist;
-      dist = DE(p);
+      //p = from + direction * totalDist;
+      p = MULK(direction, totalDist);
+      p = PLUS(p, from);
+      dist = DE(p,mandelBox_params);
       
       totalDist += .95*dist;
       
@@ -53,10 +79,9 @@ float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  
     }
   while (dist > epsModified && totalDist <= render_params.maxDistance && steps < render_params.maxRaySteps);
   
+  //vec3 hitNormal; //XXX KA not used?
   if (dist < epsModified) 
     {
-     
-     
       //we didnt escape
       pix_data.escaped = false;
       
@@ -64,39 +89,12 @@ float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  
       pix_data.hit = p;
       
       //figure out the normal of the surface at this point
-      const vec3 normPos = p - direction * epsModified;
-      
-      // printf("normPos: x: %f y: %f z: %f\n", normPos.x, normPos.y, normPos.z);
-      normal(normPos, pix_data.normal);
-      
-      
-
-  
+      vec3 normPos = MULK(direction, epsModified); // XXX was const
+      normPos = SUB(p, normPos);
+      normal(normPos, pix_data.normal, mandelBox_params);
     }
-  else {
+  else 
     //we have the background colour
     pix_data.escaped = true;
-    // printf("x: %f y: %f z: %f\n", vector_of_pixel.x, vector_of_pixel.y, vector_of_pixel.z );
-  }
-  vector_of_pixel = pix_data.hit;
-
-  return dist; 
-}
-
-
-void normal(const vec3 & p, vec3 & normal)
-{
-  // compute the normal at p
-  // const double sqrt_mach_eps = 1.4901e-08;
-  const float sqrt_mach_eps = 3.4527e-04;
-
-  float eps = std::max( p.Magnitude(), (float)(1.0))*sqrt_mach_eps;
-
-  vec3 e1(eps, 0,   0);
-  vec3 e2(0  , eps, 0);
-  vec3 e3(0  , 0, eps);
-  
-  normal = vec3(DE(p+e1)-DE(p-e1), DE(p+e2)-DE(p-e2), DE(p+e3)-DE(p-e3));
-  
-  normal.Normalize();
+return dist;
 }

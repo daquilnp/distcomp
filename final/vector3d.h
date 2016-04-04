@@ -1,139 +1,78 @@
 #ifndef vec3_h
 #define vec3_h
 
-#include <cmath>
+#ifdef _OPENACC
+#include <accelmath.h>
+#else
+#include <math.h>
+//include <cmath>
+#endif
 
-class vec3
-{
-public:
-	// Data
-	float x, y, z;
+// http://stackoverflow.com/questions/13706809/structs-in-c-with-initial-values
+typedef struct {
+  float x, y, z;
+}  vec3;
 
-	// Ctors
-	vec3( float InX, float InY, float InZ ) : x( InX ), y( InY ), z( InZ )
-		{
-		}
-	void SetfloatPoint( const float *v ) {  x=v[0]; y=v[1]; z=v[2]; }
+// SetDoublePoint
+#define SET_POINT(p,v) { p.x=v[0]; p.y=v[1]; p.z=v[2]; } 
 
-	vec3( ) : x(0), y(0), z(0)
-		{
-		}
+// RETURNS VECTOR
+//XXX used them like this  "vec3 my_vector = PLUS(v1,v2);"
+#define EQUAL(v1,v2) (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z) //inline bool operator== (const vec3& V2) const
+#define PLUS(v1,v2)  {v1.x+v2.x, v1.y+v2.y, v1.z+v2.z} // inline vec3 operator+ (const vec3& V2) const //XXX different behavior then before, now it modifies v1 in place instead of returning new vec3
+#define SUB(v1,v2)  {v1.x-v2.x, v1.y-v2.y, v1.z-v2.z} // inline vec3 operator- (const vec3& V2) const //XXX different behavior then before, now it modifies v1 in place instead of returning new vec3
+#define SUBP(v1,arr) {v1.x-arr[0], v1.y-arr[1], v1.z-arr[2]} // inline vec3 SubP(const double *v) const
+#define NEG(v1)      {-v1.x, -v1.y, -v1.z} //inline vec3 operator- ( ) const
+#define DIVK(v1,k)  {v1.x=v1.x/k; v1.y=v1.y/k; v1.z=v1.z/k;} // inline vec3 operator/ (double S ) const // XXX need more efficient
+#define DIV(v1,v2) { v1.x/v2.x, v1.y/v2.y, v1.z/v2.z}  // inline vec3 operator/ (const vec3& V2) const
+#define MUL(v1,v2) { v1.x*v2.x, v1.y*v2.y, v1.z*v2.z} // inline vec3 operator* (const vec3& V2) const
+#define MULK(v1,k)  { v1.x*k, v1.y*k, v1.z*k} // inline vec3 operator* (double S) const
+#define ADD(v1,k)  { v1.x=v1.x+k; v1.y=v1.y+k;  v1.z=v1.z+k;} // inline vec3 operator+ (double S) const
+#define SUBK(v1,k) { v1.x-k, v1.y-k, v1.z-k} 	// inline vec3 operator- (double S) const
 
-	// Operator Overloads
-	inline bool operator== (const vec3& V2) const 
-		{
-		return (x == V2.x && y == V2.y && z == V2.z);
-		}
-
-	inline vec3 operator+ (const vec3& V2) const 
-		{
-		return vec3( x + V2.x,  y + V2.y,  z + V2.z);
-		}
-	inline vec3 operator- (const vec3& V2) const
-		{
-		return vec3( x - V2.x,  y - V2.y,  z - V2.z);
-		}
-	inline vec3 SubP(const float *v) const
-		{
-		  return vec3( x - v[0],  y - v[1],  z - v[2]);
-		}
-
-	inline vec3 operator- ( ) const
-		{
-		return vec3(-x, -y, -z);
-		}
-
-	inline vec3 operator/ (float S ) const
-		{
-		float fInv = 1.0 / S;
-		return vec3 (x * fInv , y * fInv, z * fInv);
-		}
-	inline vec3 operator/ (const vec3& V2) const
-		{
-		return vec3 (x / V2.x,  y / V2.y,  z / V2.z);
-		}
-	inline vec3 operator* (const vec3& V2) const
-		{
-		return vec3 (x * V2.x,  y * V2.y,  z * V2.z);
-		}
-	inline vec3 operator* (float S) const
-		{
-		return vec3 (x * S,  y * S,  z * S);
-		}
-	inline vec3 operator+ (float S) const
-		{
-		return vec3 (x + S,  y + S,  z + S);
-		}
-	inline vec3 operator- (float S) const
-		{
-		return vec3 (x - S,  y - S,  z - S);
-		}
-
-	inline void operator+= ( const vec3& V2 )
-		{
-		x += V2.x;
-		y += V2.y;
-		z += V2.z;
-		}
-	inline void operator-= ( const vec3& V2 )
-		{
-		x -= V2.x;
-		y -= V2.y;
-		z -= V2.z;
-		}
-
-	inline float operator[] ( int i )
-		{
-		if ( i == 0 ) return x;
-		else if ( i == 1 ) return y;
-		else return z;
-		}
-
-	// Functions
-	inline float Dot( const vec3 &V1 ) const
-		{
-		return V1.x*x + V1.y*y + V1.z*z;
-		}
-
-	// These require math.h for the sqrt function
-	float Magnitude( ) const
-		{
-		//cmath cast added
-		return  sqrtf(x*x + y*y + z*z);
-		}
-
-	inline void Normalize()
-		{
-		float fMag = ( x*x + y*y + z*z );
-		if (fMag == 0) {return;}
-		//cmath cast added
-		float fMult = (1.0/sqrtf(fMag));            
-		x *= fMult;
-		y *= fMult;
-		z *= fMult;
-		return;
-		}
-};
-
-inline vec3 Subtractfloatfloat(const float *d1, const float *d2)
-{
-  return vec3(d1[0]-d2[0], d1[1]-d2[1], d1[2]-d2[2]);
+// MODIFIES FIRST VECTOR
+#define PLUSEQUAL(v1,v2)  { v1.x=v1.x+v2.x; v1.y=v1.y+v2.y; v1.z=v1.z+v2.z; } // inline void operator+= ( const vec3& V2 )
+#define SUBEQUAL(v1,v2)  { v1.x=v1.x+v2.x; v1.y=v1.y+v2.y; v1.z=v1.z+v2.z; } // inline void operator-= ( const vec3& V2 )
+//TODO KA is this necessary to convert? inline double operator[] ( int i )
+#define DOTSELF(d,v1)         {  d=( v1.x*v1.x + v1.y*v1.y + v1.z*v1.z );    }
+#define DOT(d,v1,v2)         {  d=( v1.x*v2.x + v1.y*v2.y + v1.z*v2.z );    }
+#define DOTRET(v1,v2)        ( v1.x*v2.x + v1.y*v2.y + v1.z*v2.z )
+#define MAGNITUDE(m,p) 	({ m=sqrt( p.x*p.x + p.y*p.y + p.z*p.z ); })
+#define MAGNITUDE_RET(p) 	(sqrt(p.x*p.x + p.y*p.y + p.z*p.z))
+#define NORMALIZE(p) {					\
+    float fMag = ( p.x*p.x + p.y*p.y + p.z*p.z );	\
+    if (fMag != 0)					\
+      {							\
+	float fMult = 1.0/sqrt(fMag);			\
+	p.x *= fMult;					\
+	p.y *= fMult;					\
+	p.z *= fMult;					\
+      }							\
+  }
+#define SUBDUBDUB(d1,d2)  {d1[0]-d2[0], d1[1]-d2[1], d1[2]-d2[2]} // inline vec3 SubtractDoubleDouble(const double *d1, const double *d2) 
+// Not SubP!
+#define SUBTRACT_POINT(p,v,u)			\
+  {						\
+  p.x=(v[0])-(u[0]);				\
+  p.y=(v[1])-(u[1]);				\
+  p.z=(v[2])-(u[2]);				\
+}
+#define MAX(a,b)      ( ((a)>(b))? (a):(b))
+#define VEC(v,a,b,c) vec3 v= {a,b,c}
+#define CLAMP(d, min, max) { \
+	float t=(d < min ? min : d); \
+	d=(t > max ? max : t);\
+}
+#define CLAMPVEC(v1, min, max) { \
+	CLAMP(v1.x,min,max); \
+	CLAMP(v1.y,min,max); \
+	CLAMP(v1.z,min,max);  \
 }
 
-inline float clamp(float d, float min, float max) 
-{
-  const float t = d < min ? min : d;
-  return t > max ? max : t;
-}
+// Defined by Kyle
+#define COPY(v1) {v1.x, v1.y, v1.z}
 
-
-inline void clamp(vec3 &v, float min, float max) 
-{
-  v.x = clamp(v.x,min,max);
-  v.y = clamp(v.y,min,max);
-  v.z = clamp(v.z,min,max);
-}
-
-
+#define SHOW(v1)     {printf("[%f,%f,%f]\n", v1.x, v1.y, v1.z); fflush(stdout);}
+#define SHOWMSG(msg,v1) {printf("%s: [%f,%f,%f]\n", msg, v1.x, v1.y, v1.z); fflush(stdout);}
 
 #endif
