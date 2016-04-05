@@ -50,7 +50,7 @@ void saveBMP(const char* filename, int frame_no, const unsigned char* result, in
 
 	char filename_str[80];
 	char suffix[15];
-	int frame_offset = frame_no + 0;
+	int frame_offset = frame_no + 11;
 	sprintf(suffix, "%d.bmp", frame_offset);
 	strcpy(filename_str, filename);
 	strcat(filename_str, suffix);

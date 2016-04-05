@@ -150,6 +150,7 @@ void getParameters(char *filename, float *camera_position_array, float *camera_p
 	  //FILENAME
 	case 10:
 	  strcpy(renP->file_name, buf);
+	  
 	  break;
 	}
       count++;

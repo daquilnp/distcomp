@@ -69,7 +69,7 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   distance_vector_points =  (vec3 *)malloc(sizeof(vec3) * (width*height/pin_spacing));
    int pixel_count = 0;
    int distance_to_pixel_index = 0; 
-#pragma omp parallel for default(shared) schedule(dynamic) num_threads(4)
+#pragma omp parallel for default(shared) schedule(dynamic) num_threads(8)
   for(j = 0; j < height; j++){
       int i=0;  
       for(i = 0; i <width; i++){
@@ -127,7 +127,8 @@ if (move_position == 1){
   camera_position_array[1] += t*(camera_angle_array[1]-camera_position_array[1]);
   camera_position_array[2] += t*(camera_angle_array[2]-camera_position_array[2]);
  
-    if ( vector_distance < 0.4 || frame_no == 0){
+    if ( vector_distance < 0.05 || frame_no == 0){
+      printf("\nVector Size: %f \n",  vector_distance);  
       move_position = 0;
       int max_index = 0;
       int found_flag = 0;
@@ -157,7 +158,8 @@ if (move_position == 1){
       camera_angle_changes_array[1] = current_max_vector_point.y;
       camera_angle_changes_array[2] = current_max_vector_point.z;
       
-      
+      printf("\nNew Angle: %f %f %f\n",  camera_angle_changes_array[0], camera_angle_changes_array[1], 
+      camera_angle_changes_array[2]);      
 
     }
 
@@ -168,7 +170,7 @@ float vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_angle_a
      + powf(camera_angle_changes_array[1] -camera_angle_array[1],2) 
      + powf(camera_angle_changes_array[3] -camera_angle_array[3],2));
 
-  float t = 0.10;//*(step_size/vector_distance);
+  float t = 0.20;//*(step_size/vector_distance);
   if (vector_distance < 0.05 ){
     camera_angle_array[0] = camera_angle_changes_array[0];
     camera_angle_array[1] = camera_angle_changes_array[1];
