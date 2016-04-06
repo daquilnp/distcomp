@@ -5,3 +5,5 @@ rm *.bmp
 rm *.png
 rm *.jpg
 rm tags
+rm frames/*
+rm frames/._*

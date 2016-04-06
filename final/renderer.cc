@@ -32,13 +32,13 @@
 #include "math.h"
 #include <time.h>
 
-#define TURN_SMOOTHNESS (0.2) //between 0-1, closer to one means less smooth but faster
-#define CHANGE_DIRECTION_THRESHOLD (0.06) //how close camera will get to the point it goes toward, smaller means closer
-#define STEP_SIZE (0.01) //increment in each direction, larger means faster
+#define TURN_SMOOTHNESS (3) //closer to one means less smooth but faster
+#define CHANGE_DIRECTION_THRESHOLD (0.1) //how close camera will get to the point it goes toward, smaller means closer
+#define STEP_SIZE (0.01) //increment in each direction, larger means faster (keep relatively small <0.5)
 #define PIN_SAMPLE_SIZE (5) //sampling of pixel. Larger means less pixels sampled
 #define MAX_DISTANCE_THRESHOLD (3) //Largest distance to a pixel that the auto path will look for
-#define MIN_DISTANCE_THRESHOLD (0.03) //If any vector in the sampled points is below this number, camera angle changes!
-#define SNAP_ANGLE_DISTANCE (0.05) //when the camera angle is changing and hits this distance away from new point it will snap to it
+#define MIN_DISTANCE_THRESHOLD (0.0005) //If any vector in the sampled points is below this number, camera angle changes!
+#define SNAP_ANGLE_DISTANCE (0.08) //when the camera angle is changing and hits this distance away from new point it will snap to it
 
 extern float getTime();
 extern void   printProgress( float perc, float time );
@@ -76,8 +76,7 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
   distance_to_pixel_array =  (float *)malloc(sizeof(float) * (width*height/PIN_SAMPLE_SIZE));
   distance_to_point_array =  (float *)malloc(sizeof(float) * (width*height/PIN_SAMPLE_SIZE));
   distance_vector_points =  (vec3 *)malloc(sizeof(vec3) * (width*height/PIN_SAMPLE_SIZE));
-   int pixel_count = 0;
-   int distance_to_pixel_index = 0; 
+   int distance_to_point_index = 0; 
    int min_reached_flag = 0;
    // float max_threshold = 3;
    // float change_direction_threshold = 0.06;
@@ -110,15 +109,25 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
 
       if (i%PIN_SAMPLE_SIZE == 0 && j%PIN_SAMPLE_SIZE == 0){
 
-        distance_to_pixel_array[distance_to_pixel_index] = distance_to_pixel;
-        distance_vector_points[distance_to_pixel_index] = pix_data.hit;
+        distance_to_pixel_array[distance_to_point_index] = distance_to_pixel;
+        distance_vector_points[distance_to_point_index] = pix_data.hit;
         float new_distance = sqrtf(powf(pix_data.hit.x -camera_position_array[0],2)
-       + powf(pix_data.hit.y-camera_position_array[1],2) + powf(pix_data.hit.z -camera_position_array[3],2));
-        distance_to_point_array[distance_to_pixel_index] = new_distance;
-        if (new_distance < MIN_DISTANCE_THRESHOLD){
-           min_reached_flag = 1;
-          }
-        distance_to_pixel_index++; 
+       + powf(pix_data.hit.y-camera_position_array[1],2) + powf(pix_data.hit.z -camera_position_array[2],2));
+        
+        if (pix_data.hit.x <0.008 && pix_data.hit.y < 0.008 && pix_data.hit.z < 0.008){
+           new_distance = 1000;
+           // printf ("\n(0 0 0): Location: %d %d,  d: %f AT %f %f %f\n", i, j, new_distance,
+           // pix_data.hit.x, pix_data.hit.y, pix_data.hit.z);          
+        }
+        distance_to_point_array[distance_to_point_index] = new_distance;
+        // if (new_distance < MIN_DISTANCE_THRESHOLD && min_reached_flag == 0){
+
+        //    min_reached_flag = 1;
+        //    printf ("\nMin Point Distance: %f AT %f %f %f, FROM %f %f %f\n", new_distance,
+        //    pix_data.hit.x, pix_data.hit.y, pix_data.hit.z, camera_position_array[0], camera_position_array[1],
+        //    camera_position_array[2]);
+        //   } 
+        distance_to_point_index++; 
   }
 
     //get the colour at this pixel
@@ -129,35 +138,43 @@ float *camera_angle_array, float *camera_angle_changes_array, int frame_no,
     image[k+2] = (unsigned char)(color.x * 255);
     image[k+1] = (unsigned char)(color.y * 255);
     image[k]   = (unsigned char)(color.z * 255);
-    pixel_count++;
+    
   } // inner for
       //printProgress((j+1)/(float)height,getTime()-time);
     }//end of outer for
 
 if (min_reached_flag == 1){
-    move_position = 0;
+    // move_position = 0;
     camera_angle_changes_array[0] += ((rand() % 200) - 100)*.01;
     camera_angle_changes_array[1] += ((rand() % 200) - 100)*.01;
     camera_angle_changes_array[2] += ((rand() % 200) - 100)*.01;
+    printf("\nRandom Switch\n");
 
 }
-if (move_position == 1){
-
-  float vector_distance = sqrtf(powf(camera_angle_array[0] -camera_position_array[0],2)
-     + powf(camera_angle_array[1] -camera_position_array[1],2) + powf(camera_angle_array[3] -camera_position_array[3],2));
-
-  float t = STEP_SIZE/vector_distance;
-  camera_position_array[0] += t*(camera_angle_array[0]-camera_position_array[0]);
-  camera_position_array[1] += t*(camera_angle_array[1]-camera_position_array[1]);
-  camera_position_array[2] += t*(camera_angle_array[2]-camera_position_array[2]);
- 
-    if ( vector_distance < CHANGE_DIRECTION_THRESHOLD || frame_no == 0){
-      printf("\nVector Size: %f \n",  vector_distance);  
-      move_position = 0;
+float pos_vector_distance = 0;
+if (frame_no == 0){
+  pos_vector_distance = sqrtf(powf(camera_angle_array[0] -camera_position_array[0],2)
+ + powf(camera_angle_array[1] -camera_position_array[1],2) 
+ + powf(camera_angle_array[2] -camera_position_array[2],2));
+    printf ("\nCurrent Distance: %f AT %f %f %f FROM %f %f %f\n", pos_vector_distance,
+       camera_angle_array[0], camera_angle_array[1], camera_angle_array[2],
+       camera_position_array[0], camera_position_array[1], camera_position_array[2]);
+}
+else{
+  pos_vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_position_array[0],2)
+ + powf(camera_angle_changes_array[1] -camera_position_array[1],2) 
+ + powf(camera_angle_changes_array[2] -camera_position_array[2],2));
+    printf ("\nCurrent Distance: %f AT %f %f %f FROM %f %f %f\n", pos_vector_distance,
+       camera_angle_changes_array[0], camera_angle_changes_array[1], camera_angle_changes_array[2],
+       camera_position_array[0], camera_position_array[1], camera_position_array[2]);
+}
+    if ( pos_vector_distance < CHANGE_DIRECTION_THRESHOLD || frame_no == 0){
+      printf("\nChange Direction: distance = %f \n",  pos_vector_distance);  
+      move_position = 1;
       int max_index = 0;
       int found_flag = 0;
       float current_max = 0;
-      float current_max_distance = 0;
+      // float current_max_distance = 0;
       vec3 current_max_vector_point; 
 
       max_index = 0;
@@ -166,52 +183,57 @@ if (move_position == 1){
           if (distance_to_point_array[max_index] < MAX_DISTANCE_THRESHOLD){
               current_max = distance_to_point_array[max_index];
               current_max_vector_point = distance_vector_points[max_index];
-              current_max_distance = distance_to_pixel_array[max_index];
+              printf ("\nIndex: %d, Potential MAX DISTANCE: %f AT %f %f %f\n", max_index, current_max,
+               current_max_vector_point.x, current_max_vector_point.y, current_max_vector_point.z); 
               found_flag = 1;
           }
           max_index++;
       }
       
-      for (;max_index < distance_to_pixel_index; max_index++){
-          if (distance_to_point_array[max_index] > current_max && distance_to_point_array[max_index] < MAX_DISTANCE_THRESHOLD){
+      for (;max_index < distance_to_point_index; max_index++){
+          if (distance_to_point_array[max_index] > current_max && 
+            distance_to_point_array[max_index] < MAX_DISTANCE_THRESHOLD){
               current_max = distance_to_point_array[max_index];
               current_max_vector_point = distance_vector_points[max_index];
-              current_max_distance = distance_to_pixel_array[max_index];        
+              printf ("\nPotential MAX DISTANCE: %f AT %f %f %f\n", current_max,
+               current_max_vector_point.x, current_max_vector_point.y, current_max_vector_point.z); 
+                     
           }
 
       }
-      // printf("\nPoint Furthest: %f Pixel Furthest: %f\n",  current_max, current_max_distance);
+
       camera_angle_changes_array[0] = current_max_vector_point.x;
       camera_angle_changes_array[1] = current_max_vector_point.y;
       camera_angle_changes_array[2] = current_max_vector_point.z;
-      
-      printf("\nNew Angle: %f %f %f\n",  camera_angle_changes_array[0], camera_angle_changes_array[1], 
-      camera_angle_changes_array[2]);      
-
+      printf ("\nNEW MAX DISTANCE: %f AT %f %f %f\n", current_max,
+       current_max_vector_point.x, current_max_vector_point.y, current_max_vector_point.z);       
     }
+  float angle_vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_angle_array[0],2)
+   + powf(camera_angle_changes_array[1] -camera_angle_array[1],2) 
+   + powf(camera_angle_changes_array[2] -camera_angle_array[2],2));
 
-}
-else
-{
-float vector_distance = sqrtf(powf(camera_angle_changes_array[0] -camera_angle_array[0],2)
-     + powf(camera_angle_changes_array[1] -camera_angle_array[1],2) 
-     + powf(camera_angle_changes_array[3] -camera_angle_array[3],2));
-
-  float t = TURN_SMOOTHNESS*(STEP_SIZE/vector_distance);
-  if (vector_distance < SNAP_ANGLE_DISTANCE ){
+  if (angle_vector_distance < SNAP_ANGLE_DISTANCE && move_position == 1){
+    move_position = 0;
     camera_angle_array[0] = camera_angle_changes_array[0];
     camera_angle_array[1] = camera_angle_changes_array[1];
     camera_angle_array[2] = camera_angle_changes_array[2];
-
-    move_position = 1;
-    
+    printf("\nSnapped In Look At\n");
+    // printf("\nAngle Changes: %f %f %f\n", camera_angle_changes_array[0],camera_angle_changes_array[1],
+    //   camera_angle_changes_array[2]);
+    // move_position = 1;
   }
-  camera_angle_array[0] += t*(camera_angle_changes_array[0]-camera_angle_array[0]);
-  camera_angle_array[1] += t*(camera_angle_changes_array[1]-camera_angle_array[1]);
-  camera_angle_array[2] += t*(camera_angle_changes_array[2]-camera_angle_array[2]);
+  else{
+    float t_angle = TURN_SMOOTHNESS*STEP_SIZE;//(STEP_SIZE/angle_vector_distance);
+    camera_angle_array[0] += t_angle*(camera_angle_changes_array[0]-camera_angle_array[0]);
+    camera_angle_array[1] += t_angle*(camera_angle_changes_array[1]-camera_angle_array[1]);
+    camera_angle_array[2] += t_angle*(camera_angle_changes_array[2]-camera_angle_array[2]);
 
- 
-}
+  }
+    float t_pos = STEP_SIZE;
+    camera_position_array[0] += t_pos*(camera_angle_changes_array[0]-camera_position_array[0]);
+    camera_position_array[1] += t_pos*(camera_angle_changes_array[1]-camera_position_array[1]);
+    camera_position_array[2] += t_pos*(camera_angle_changes_array[2]-camera_position_array[2]);
+
   printf("\n rendering done:\n");
 
 
