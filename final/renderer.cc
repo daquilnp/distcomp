@@ -36,9 +36,9 @@
 #define CHANGE_DIRECTION_THRESHOLD (0.1) //how close camera will get to the point it goes toward, smaller means closer
 #define STEP_SIZE (0.01) //increment in each direction, larger means faster (keep relatively small <0.5)
 #define PIN_SAMPLE_SIZE (5) //sampling of pixel. Larger means less pixels sampled
-#define MAX_DISTANCE_THRESHOLD (3) //Largest distance to a pixel that the auto path will look for
+#define MAX_DISTANCE_THRESHOLD (0.8) //Largest distance to a pixel that the auto path will look for
 #define MIN_DISTANCE_THRESHOLD (0.0005) //If any vector in the sampled points is below this number, camera angle changes!
-#define SNAP_ANGLE_DISTANCE (0.08) //when the camera angle is changing and hits this distance away from new point it will snap to it
+#define SNAP_ANGLE_DISTANCE (0.02) //when the camera angle is changing and hits this distance away from new point it will snap to it
 
 extern float getTime();
 extern void   printProgress( float perc, float time );
