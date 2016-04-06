@@ -183,8 +183,8 @@ else{
           if (distance_to_point_array[max_index] < MAX_DISTANCE_THRESHOLD){
               current_max = distance_to_point_array[max_index];
               current_max_vector_point = distance_vector_points[max_index];
-              printf ("\nIndex: %d, Potential MAX DISTANCE: %f AT %f %f %f\n", max_index, current_max,
-               current_max_vector_point.x, current_max_vector_point.y, current_max_vector_point.z); 
+              // printf ("\nIndex: %d, Potential MAX DISTANCE: %f AT %f %f %f\n", max_index, current_max,
+              //  current_max_vector_point.x, current_max_vector_point.y, current_max_vector_point.z); 
               found_flag = 1;
           }
           max_index++;
@@ -195,8 +195,8 @@ else{
             distance_to_point_array[max_index] < MAX_DISTANCE_THRESHOLD){
               current_max = distance_to_point_array[max_index];
               current_max_vector_point = distance_vector_points[max_index];
-              printf ("\nPotential MAX DISTANCE: %f AT %f %f %f\n", current_max,
-               current_max_vector_point.x, current_max_vector_point.y, current_max_vector_point.z); 
+              // printf ("\nPotential MAX DISTANCE: %f AT %f %f %f\n", current_max,
+              //  current_max_vector_point.x, current_max_vector_point.y, current_max_vector_point.z); 
                      
           }
 

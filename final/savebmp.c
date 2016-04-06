@@ -23,7 +23,7 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-#define OFFSET (0) //if you want to start the count from a different number
+#define OFFSET (390) //if you want to start the count from a different number
 void saveBMP(const char* filename, int frame_no, const unsigned char* result, int w, int h){
 
 	FILE *f;
@@ -51,7 +51,7 @@ void saveBMP(const char* filename, int frame_no, const unsigned char* result, in
 	char filename_str[80];
 	char suffix[15];
 	int frame_offset = frame_no + OFFSET;
-	sprintf(suffix, "%d.bmp", frame_offset);
+	sprintf(suffix, "00%d.bmp", frame_offset);
 	strcpy(filename_str, filename);
 	strcat(filename_str, suffix);
 	f = fopen(filename_str,"wb");

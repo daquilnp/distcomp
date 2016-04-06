@@ -49,7 +49,7 @@ int main(int argc, char** argv)
   int frame_counter = 0;
   int move_position = 1;
   // int clear_position_changes;
-  while (frame_counter < 7200){
+  while (frame_counter < 400){
 
   getParameters(argv[1], camera_position_array, camera_position_changes_array, camera_angle_array, 
     camera_angle_changes_array, frame_counter,
