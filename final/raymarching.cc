@@ -51,7 +51,7 @@ static inline void normal(const vec3 & p, vec3 & normal, MandelBoxParams &mandel
   NORMALIZE(normal);
 }
 
-float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps, pixelData& pix_data
+void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps, pixelData& pix_data
 , MandelBoxParams &mandelBox_params)
 {
 
@@ -96,5 +96,5 @@ float rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  
   else 
     //we have the background colour
     pix_data.escaped = true;
-return dist;
+// return dist;
 }

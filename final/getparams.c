@@ -24,13 +24,14 @@
 #include "renderer.h"
 #include "mandelbox.h"
 #include "camera.h"
+#include "vector3d.h"
 
 #define BUF_SIZE 1024
 
 
 
-void getParameters(char *filename, float *camera_position_array, float *camera_position_changes_array, 
-	float *camera_angle_array, float *camera_angle_changes_array,
+void getParameters(char *filename, float *camera_position_array, vec3 *frame_position_array, 
+	float *camera_angle_array, vec3 *frame_angle_array,
 	 int frame_no, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
 {
   FILE *fp;
@@ -73,6 +74,12 @@ void getParameters(char *filename, float *camera_position_array, float *camera_p
 		  camera_position_array[0] = *d;
 		  camera_position_array[1] = *(d+1);
 		  camera_position_array[2] = *(d+2);
+		  
+		  frame_position_array[0].x = *d;
+		  frame_position_array[0].y = *(d+1);
+		  frame_position_array[0].z = *(d+2);
+		  
+	
 	  }
 	  else{
 		  // camera_position_array[0] = camera_position_array[0] + camera_position_changes_array[0];
@@ -96,6 +103,10 @@ void getParameters(char *filename, float *camera_position_array, float *camera_p
 	  	  camera_angle_array[0] = *d;
 		  camera_angle_array[1] = *(d+1);
 		  camera_angle_array[2] = *(d+2);
+		  
+		  frame_angle_array[0].x = *d;
+		  frame_angle_array[0].y = *(d+1);
+		  frame_angle_array[0].z = *(d+2);		  
 	  }
 	  else
 	  {

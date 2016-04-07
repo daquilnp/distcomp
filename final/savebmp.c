@@ -23,7 +23,7 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-#define OFFSET (390) //if you want to start the count from a different number
+#define OFFSET (0) //if you want to start the count from a different number
 void saveBMP(const char* filename, int frame_no, const unsigned char* result, int w, int h){
 
 	FILE *f;
