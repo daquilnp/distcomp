@@ -26,7 +26,19 @@
 
 //---------------------------------------------------------------------------------------------
 //when projection and modelview matricies are static (computed only once, and camera does not mover)
-int UnProject(float winX, float winY, CameraParams camP, float *obj)
+//#pragma acc routine seq
+/*
+inline void MultiplyMatrixByVector(float *resultvector, float *matrix, float *pvector)
+{
+  resultvector[0]=matrix[0]*pvector[0]+matrix[4]*pvector[1]+matrix[8]*pvector[2]+matrix[12]*pvector[3];
+  resultvector[1]=matrix[1]*pvector[0]+matrix[5]*pvector[1]+matrix[9]*pvector[2]+matrix[13]*pvector[3];
+  resultvector[2]=matrix[2]*pvector[0]+matrix[6]*pvector[1]+matrix[10]*pvector[2]+matrix[14]*pvector[3];
+  resultvector[3]=matrix[3]*pvector[0]+matrix[7]*pvector[1]+matrix[11]*pvector[2]+matrix[15]*pvector[3];
+}
+*/
+
+#pragma acc routine seq
+int UnProject(float winX, float winY, const CameraParams &camP, float *obj)
 {
   //Transformation vectors
   float in[4];
@@ -39,7 +51,11 @@ int UnProject(float winX, float winY, CameraParams camP, float *obj)
   in[3]=1.0;
   
   //Objects coordinates
-  MultiplyMatrixByVector(out, camP.matInvProjModel, in);
+  //MultiplyMatrixByVector(out, camP.matInvProjModel, in); // XXX KA
+  out[0]=camP.matInvProjModel[0]*in[0]+camP.matInvProjModel[4]*in[1]+camP.matInvProjModel[8]*in[2]+camP.matInvProjModel[12]*in[3];
+  out[1]=camP.matInvProjModel[1]*in[0]+camP.matInvProjModel[5]*in[1]+camP.matInvProjModel[9]*in[2]+camP.matInvProjModel[13]*in[3];
+  out[2]=camP.matInvProjModel[2]*in[0]+camP.matInvProjModel[6]*in[1]+camP.matInvProjModel[10]*in[2]+camP.matInvProjModel[14]*in[3];
+  out[3]=camP.matInvProjModel[3]*in[0]+camP.matInvProjModel[7]*in[1]+camP.matInvProjModel[11]*in[2]+camP.matInvProjModel[15]*in[3];
   
   if(out[3]==0.0)
     return 0;
@@ -236,21 +252,19 @@ void MultiplyMatrices(float *result, const float *matrix1, const float *matrix2)
     matrix1[11]*matrix2[14]+
     matrix1[15]*matrix2[15];
 }
-
-void MultiplyMatrixByVector(float *resultvector, float *matrix, float *pvector)
+/*
+inline void MultiplyMatrixByVector(double *resultvector, double *matrix, double *pvector)
 {
   resultvector[0]=matrix[0]*pvector[0]+matrix[4]*pvector[1]+matrix[8]*pvector[2]+matrix[12]*pvector[3];
   resultvector[1]=matrix[1]*pvector[0]+matrix[5]*pvector[1]+matrix[9]*pvector[2]+matrix[13]*pvector[3];
   resultvector[2]=matrix[2]*pvector[0]+matrix[6]*pvector[1]+matrix[10]*pvector[2]+matrix[14]*pvector[3];
   resultvector[3]=matrix[3]*pvector[0]+matrix[7]*pvector[1]+matrix[11]*pvector[2]+matrix[15]*pvector[3];
-}
+}*/
 
 #define SWAP_ROWS(a, b) { float *_tmp = a; (a)=(b); (b)=_tmp; }
 #define MAT(m,r,c) (m)[(c)*4+(r)]
 
 int InvertMatrix(float *m, float *out){
-
-
   float wtmp[4][8];
   float m0, m1, m2, m3, s;
   float *r0, *r1, *r2, *r3;

@@ -3,7 +3,7 @@
 FINAL_FILE=images/output.mp4
 INTRO_FILE=intro.mp4
 INTRO_IMG=title_slide2.jpg
-FPS=6           # 30 frames per second, final should be 30
+FPS=1           # 30 frames per second, final should be 30
 RES=400x400      # should be 1920x1080
  
 #===========================================================
@@ -19,7 +19,7 @@ done
 # ffmpeg -loop 1 -i $INTRO_IMG -t 5 $INTRO_FILE
 
 # make video from the images
-ffmpeg -r $FPS -i images/image%03d.bmp.jpg -b 5000k -s $RES $FINAL_FILE
+fmpeg -r $FPS -i images/image-%05d.jpg -b 5000k -s $RES $FINAL_FILE
 
 # combine intro + main video
 

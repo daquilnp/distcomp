@@ -1,27 +1,26 @@
 # CAMERA
-# location  x,y,z   (7,7,7) 3.2 1 5
-2.868479 0.425645 0.949145
-# look_at (target)  x,y,z 0 1 0 
-3.106159 0.350867 0.636375
+# location  x,y,z   (7,7,7)
+14.0 8.0 10.0
+# look at   x,y,z
+0 0 0 
 # up vector x,y,z;  (0, 1, 0)
 0 1 0
 # field of view     (1)
-1.1  
+1.1
 # IMAGE
 # width height
-#3840 2160  1920 1080
-400 400
+6080 6080
 # detail level, the smaller the more detailed (-3)
--3.7
+-4
 # MANDELBOX
 # scale, rMin, rFixed  (2 0.5 1)
-2.4 0.5 1
+2  0.5 1
 # max number of iterations, escape time
-28 100
+18 100
 # COLORING
-# type 0 or 1
+# type 0 or 1  
 1
 # brightness
 1.2
 # IMAGE FILE NAME
-timage3.bmp
+image.bmp

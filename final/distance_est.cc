@@ -32,23 +32,60 @@
 
 //using namespace std;
 //extern MandelBoxParams mandelBox_params; // KA no global variables!
-extern float MandelBoxDE(const vec3 &pos, const MandelBoxParams &mPar, float c1, float c2);
-float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params);
+//extern double MandelBoxDE(const vec3 &pos, const MandelBoxParams &mPar, double c1, double c2);
+//double MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params);
 
 //Distance Estimator Field Selector
-float DE(const vec3 &p, MandelBoxParams &mandelBox_params)
-{	
-#ifdef BULB
-  float d = MandelBulbDistanceEstimator(p, mandelBox_params);
-#else
-  float c1 = fabsf(mandelBox_params.scale - 1.0);
-  float c2 = powf( fabsf(mandelBox_params.scale), 1 - mandelBox_params.num_iter);
-  float d = MandelBoxDE(p, mandelBox_params, c1, c2);
-#endif
-  return d;
+inline float MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, float c1, float c2)
+{
+  vec3 p = COPY(p0);
+  float rMin2   = SQR(params.rMin);
+  float rFixed2 = SQR(params.rFixed);
+  float escape  = SQR(params.escape_time);
+  float dfactor = 1; 
+  float r2      =-1;
+  const float rFixed2rMin2 = rFixed2/rMin2;
+
+  int i = 0;
+  while (i< params.num_iter && r2 < escape)
+    {
+      COMPONENT_FOLD(p.x);
+      COMPONENT_FOLD(p.y);
+      COMPONENT_FOLD(p.z);
+      
+      DOTSELF(r2, p);     
+
+      if (r2<rMin2)
+	{
+          //p = {p.x*rFixed2rMin2, p.y*rFixed2rMin2, p.z*rFixed2rMin2};//MULK(p, rFixed2rMin2);
+	  MULK_SET(p, rFixed2rMin2);
+	  dfactor *= (rFixed2rMin2);
+	}
+      else
+      if ( r2<rFixed2) 
+	{
+	  const float t = (rFixed2/r2);
+          float inter = rFixed2/r2;
+	  MULK_SET(p, inter);
+	  dfactor *= t;
+	}
+      
+
+      dfactor = dfactor*fabs(params.scale)+1.0;      
+      MULK_SET(p, params.scale);
+      PLUS_SET(p, p0);
+      i++;
+    }
+  
+  float mag;
+  MAGNITUDE(mag, p);
+  
+  return  (mag - c1) / dfactor - c2;
 }
 
-float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params)
+
+
+inline float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params)
 {
   vec3 z = COPY(p0);
   
@@ -66,7 +103,7 @@ float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params)
 
       float theta = acos(z.z/r);
       float phi   = atan2(z.y, z.x);
-      dr = pow(r, Power - 1.0) * Power * dr + 1.0;
+      dr = powf(r, Power - 1.0) * Power * dr + 1.0;
 
       float zr = pow(r, Power);
       theta     = theta * Power;
@@ -83,6 +120,23 @@ float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params)
 
   return 0.5*log(r)*r/dr;
 }
+
+
+
+//#pragma acc routine seq
+inline float DE(const vec3 &p, const MandelBoxParams &mandelBox_params)
+{	
+#ifdef BULB
+  float d = MandelBulbDistanceEstimator(p, mandelBox_params);
+#else
+  float c1 = fabsf(mandelBox_params.scale - 1.0);
+  float c2 = powf( fabsf(mandelBox_params.scale), 1 - mandelBox_params.num_iter);
+  float d = MandelBoxDE(p, mandelBox_params, c1, c2);
+#endif
+  return d;
+}
+
+
 
 
 

@@ -30,6 +30,7 @@
 
 #define COMPONENT_FOLD(x) { (x) = fabs(x) <= 1? (x) : copysign(2,(x))-(x); }
 
+/*
 static inline float MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, float c1, float c2)
 {
   vec3 p = COPY(p0);
@@ -51,7 +52,8 @@ static inline float MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, f
 
       if (r2<rMin2)
 	{
-          p = MULK(p, rFixed2rMin2);
+          //p = {p.x*rFixed2rMin2, p.y*rFixed2rMin2, p.z*rFixed2rMin2};//MULK(p, rFixed2rMin2);
+	  MULK_SET(p, rFixed2rMin2);
 	  dfactor *= (rFixed2rMin2);
 	}
       else
@@ -59,14 +61,14 @@ static inline float MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, f
 	{
 	  const float t = (rFixed2/r2);
           float inter = rFixed2/r2;
-	  p = MULK(p, inter);
+	  MULK_SET(p, inter);
 	  dfactor *= t;
 	}
       
 
       dfactor = dfactor*fabs(params.scale)+1.0;      
-      p = MULK(p, params.scale);
-      p = PLUS(p, p0);
+      MULK_SET(p, params.scale);
+      PLUS_SET(p, p0);
       i++;
     }
   
@@ -75,5 +77,5 @@ static inline float MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, f
   
   return  (mag - c1) / dfactor - c2;
 }
-
+*/
 

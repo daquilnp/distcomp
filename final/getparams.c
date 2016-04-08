@@ -25,14 +25,11 @@
 #include "mandelbox.h"
 #include "camera.h"
 #include "vector3d.h"
-
 #define BUF_SIZE 1024
 
-
-
-void getParameters(char *filename, float *camera_position_array, vec3 *frame_position_array, 
-	float *camera_angle_array, vec3 *frame_angle_array,
-	 int frame_no, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
+void getParameters(char *filename, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP,
+	float *camera_position_array, vec3 *frame_position_array, 
+  float *camera_angle_array, vec3 *frame_angle_array, int frame_no)
 {
   FILE *fp;
   int ret;
@@ -122,7 +119,6 @@ void getParameters(char *filename, float *camera_position_array, vec3 *frame_pos
 		  printf("camAng: %f %f %f\n", *d, *(d+1) , *(d+2));
 	  }
 	  break;
-	  //camera up 
 	case 2:
 	  d = camP->camUp;
 	  sscanf(buf, "%f %f %f", d, d+1, d+2);
@@ -161,7 +157,7 @@ void getParameters(char *filename, float *camera_position_array, vec3 *frame_pos
 	  //FILENAME
 	case 10:
 	  strcpy(renP->file_name, buf);
-	  
+	  //printf(" *** File %s does not exist\n", buf);
 	  break;
 	}
       count++;

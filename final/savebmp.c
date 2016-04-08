@@ -22,11 +22,15 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include <string.h>
-#define OFFSET (0) //if you want to start the count from a different number
-void saveBMP(const char* filename, int frame_no, const unsigned char* result, int w, int h){
+#include <strings.h>
+
+#define SAVEDIR "images/"
+
+void saveBMP(const char* filename, const unsigned char* result, int w, int h){
 
 	FILE *f;
+	char fullPath[128];
+	bzero(fullPath, 128);
 	unsigned char *img = NULL;
 	int filesize = 54 + 3*w*h;  //w is your image width, h is image height, both int
 
@@ -48,18 +52,11 @@ void saveBMP(const char* filename, int frame_no, const unsigned char* result, in
 	bmpinfoheader[10] = (unsigned char)(       h>>16);
 	bmpinfoheader[11] = (unsigned char)(       h>>24);
 
-	char filename_str[80];
-	char suffix[15];
-	int frame_offset = frame_no + OFFSET;
-	sprintf(suffix, "00%d.bmp", frame_offset);
-	strcpy(filename_str, filename);
-	strcat(filename_str, suffix);
-	f = fopen(filename_str,"wb");
+	sprintf(fullPath, "%s%s", SAVEDIR, filename);
+	f = fopen(fullPath,"wb");
 	fwrite(bmpfileheader,1,14,f);
 	fwrite(bmpinfoheader,1,40,f);
-	printf("Writing to: %s\n", filename_str);
 
-	
 	img = (unsigned char *)malloc(3*w);
 	assert(img);
 
@@ -77,4 +74,5 @@ void saveBMP(const char* filename, int frame_no, const unsigned char* result, in
 	}
 	fclose(f);
 
+	system("./convert.sh");
 }
